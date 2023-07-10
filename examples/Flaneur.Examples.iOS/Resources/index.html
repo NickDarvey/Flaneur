@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flaneur</title>
+</head>
+<body>
+    Hello, web.
+    <script>
+        // setup AbortController
+        const controller = new AbortController();
+        // signal to pass to fetch
+        const signal = controller.signal;
+
+        // fetch as usual
+        fetch('flaneur://test', { signal })
+            .then((response) => response.body.pipeThrough(new TextDecoderStream()).getReader())
+            .then(async (reader) => {
+                console.log("Started");
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) {
+                        console.log("Completed");
+                        break;
+                    }
+                    console.log("Received", value);
+                }
+                reader.releaseLock();
+            })
+            .catch(console.error);
+
+        setTimeout(() => controller.abort(), 5000);
+    </script>
+</body>
+</html>

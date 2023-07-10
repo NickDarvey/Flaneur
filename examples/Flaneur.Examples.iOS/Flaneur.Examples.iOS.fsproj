@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<TargetFramework>net7.0-ios</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+		<RestoreSources>../../artifacts;https://api.nuget.org/v3/index.json</RestoreSources>
+		<FlaneurLaunchUrlCommand>echo http://localhost:9000</FlaneurLaunchUrlCommand>
+		<FlaneurLaunchCommand>echo qwasdfasdfstart</FlaneurLaunchCommand>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="WebAppViewController.fs" />
+		<Compile Include="AppDelegate.fs" />
+		<Compile Include="SceneDelegate.fs" />
+		<Compile Include="Main.fs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Flaneur.MSBuild" />
+		<PackageReference Include="FSharp.Data.LiteralProviders" Version="1.0.3" PrivateAssets="all" />
+	</ItemGroup>
+</Project>

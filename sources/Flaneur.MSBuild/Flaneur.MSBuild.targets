@@ -1,0 +1,43 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<UsingTask TaskName="Flaneur.MSBuild.LaunchTask" AssemblyFile="../tasks/netstandard2.0/Flaneur.MSBuild.dll" />
+	<UsingTask TaskName="Flaneur.MSBuild.SetEnvTask" AssemblyFile="../tasks/netstandard2.0/Flaneur.MSBuild.dll" />
+
+
+	<PropertyGroup>
+		<BuildDependsOn>
+			RunPreLaunchTasks;
+			$(BuildDependsOn);
+			RunLaunchTasks
+		</BuildDependsOn>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<!--
+			Run via Visual Studio, IsImplicitlyTriggeredBuild is true
+			https://github.com/dotnet/roslyn/blob/5100eeedfe43c45b53fc298d6341d4d52e0d735a/src/Compilers/Core/MSBuildTask/Microsoft.Managed.Core.targets#L85-L96
+		-->
+		<IsLaunch Condition="'$(IsLaunch)' == '' and '$(IsImplicitlyTriggeredBuild)' == true">true</IsLaunch>
+		
+		<!--
+			Run via `dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID`, _MlaunchWaitForExit is set
+			https://github.com/xamarin/xamarin-macios/blob/43ae6c749407e47fdf5fa07295119b87f7328ea6/dotnet/targets/Xamarin.Shared.Sdk.targets#L1860-L1925
+		-->
+		<IsLaunch Condition="'$(IsLaunch)' == '' and '$(_MlaunchWaitForExit)' != ''">true</IsLaunch>
+	</PropertyGroup>
+
+	<Target Name="RunPreLaunchTasks" Condition="'$(IsLaunch)' == 'true'">
+		<Exec Condition="'$(FlaneurLaunchUrlCommand)' != '' and '$(FlaneurLaunchUrl)' == ''" Command="$(FlaneurLaunchUrlCommand)" ConsoleToMSBuild="true">
+			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurLaunchUrl" />
+		</Exec>
+		<SetEnvTask Condition="'$(FlaneurLaunchUrl)' != ''" Variable="FLANEUR_LAUNCH_URL" Value="$(FlaneurLaunchUrl)" />
+	</Target>
+	
+	<Target Name="RunLaunchTasks" Condition="'$(IsLaunch)' == 'true'">
+		<ItemGroup>
+			<Launch Condition="'$(FlaneurLaunchCommand)' != ''" Include="$(FlaneurLaunchCommand)" />
+		</ItemGroup>
+		<Message Importance="high" Text="Launching command '%(Launch.Identity)'" />
+		<!-- https://github.com/dotnet/roslyn/blob/5100eeedfe43c45b53fc298d6341d4d52e0d735a/src/Compilers/Core/MSBuildTask/Microsoft.Managed.Core.targets#L85-L96 -->
+		<LaunchTask Command="%(Launch.Identity)" />
+	</Target>
+</Project>
