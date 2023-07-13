@@ -1,7 +1,7 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<UsingTask TaskName="Flaneur.MSBuild.LaunchTask" AssemblyFile="../tasks/netstandard2.0/Flaneur.MSBuild.dll" />
-	<UsingTask TaskName="Flaneur.MSBuild.SetEnvTask" AssemblyFile="../tasks/netstandard2.0/Flaneur.MSBuild.dll" />
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<UsingTask TaskName="Flaneur.MSBuild.LaunchTask" AssemblyFile="$(FlaneurAssemblyDir)/Flaneur.MSBuild.dll" />
+	<UsingTask TaskName="Flaneur.MSBuild.SetEnvTask" AssemblyFile="$(FlaneurAssemblyDir)/Flaneur.MSBuild.dll" />
 
 	<PropertyGroup>
 		<BuildDependsOn>

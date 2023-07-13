@@ -22,10 +22,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Library.fs" />
+		<Compile Include="Tasks.fs" />
+		<Content Include="Flaneur.MSBuild.project.props">
+			<Pack>false</Pack>
+		</Content>
+		<Content Include="Flaneur.MSBuild.package.props">
+			<Pack>true</Pack>
+			<PackagePath>build/Flaneur.MSBuild.props</PackagePath>
+		</Content>
 		<Content Include="Flaneur.MSBuild.targets">
+			<Pack>true</Pack>
 			<PackagePath>build</PackagePath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 

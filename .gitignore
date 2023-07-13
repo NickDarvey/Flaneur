@@ -3,6 +3,7 @@ bin/
 obj/
 artifacts/
 *.user
+*.binlog
 
 node_modules/
 dist/

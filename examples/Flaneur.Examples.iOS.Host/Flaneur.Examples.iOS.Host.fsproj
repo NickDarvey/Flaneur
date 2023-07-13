@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	
+﻿<Project>
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
 	<PropertyGroup>
 		<TargetFramework>net7.0-ios</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
-		<RestoreSources>../../artifacts;https://api.nuget.org/v3/index.json</RestoreSources>
 		<FlaneurLaunchUrlCommand>npm run -s print:start-url</FlaneurLaunchUrlCommand>
 		<FlaneurLaunchCommand>npm run start</FlaneurLaunchCommand>
 		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
@@ -17,10 +17,30 @@
 		<Compile Include="Main.fs" />
 	</ItemGroup>
 
-	<ItemGroup />
-
 	<ItemGroup>
-		<PackageReference Include="Flaneur.MSBuild" />
 		<PackageReference Include="FSharp.Data.LiteralProviders" Version="1.0.3" PrivateAssets="all" />
 	</ItemGroup>
+
+	<PropertyGroup>
+		<!-- For testing via package:
+			(You will need to delete the package from the nuget cache with each change. 
+			Probably that means deleting `~/.nuget/Flaneur.MSBuild`.) -->
+		<!--<FlaneurTestWith>package</FlaneurTestWith>-->
+		<FlaneurTestWith>project</FlaneurTestWith>
+
+		<RestoreSources Condition="'$(FlaneurTestWith)' == 'package'">../../artifacts;https://api.nuget.org/v3/index.json</RestoreSources>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.MSBuild" />
+		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.MSBuild/Flaneur.MSBuild.fsproj" />
+	</ItemGroup>
+
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+	<ImportGroup Condition="'$(FlaneurTestWith)' == 'project'">
+		<Import Project="../../sources/Flaneur.MSBuild/Flaneur.MSBuild.project.props" />
+		<Import Project="../../sources/Flaneur.MSBuild/Flaneur.MSBuild.targets" />
+	</ImportGroup>
+
 </Project>
