@@ -2,3 +2,7 @@
 bin/
 obj/
 artifacts/
+*.user
+
+node_modules/
+dist/

@@ -5,8 +5,9 @@
 		<OutputType>Exe</OutputType>
 		<SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
 		<RestoreSources>../../artifacts;https://api.nuget.org/v3/index.json</RestoreSources>
-		<FlaneurLaunchUrlCommand>echo http://localhost:9000</FlaneurLaunchUrlCommand>
-		<FlaneurLaunchCommand>echo qwasdfasdfstart</FlaneurLaunchCommand>
+		<FlaneurLaunchUrlCommand>npm run -s print:start-url</FlaneurLaunchUrlCommand>
+		<FlaneurLaunchCommand>npm run start</FlaneurLaunchCommand>
+		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -15,6 +16,8 @@
 		<Compile Include="SceneDelegate.fs" />
 		<Compile Include="Main.fs" />
 	</ItemGroup>
+
+	<ItemGroup />
 
 	<ItemGroup>
 		<PackageReference Include="Flaneur.MSBuild" />

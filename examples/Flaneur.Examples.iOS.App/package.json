@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "scripts": {
+    "print:start-url": "node --print \"require('running-at')(5173).network\"",
+    "install": "dotnet tool restore",
+    "build": "dotnet fable . -o bin/wwwroot --run vite build",
+    "start": "dotnet fable watch . -s -o bin/wwwroot --run vite dev --host 0.0.0.0 --port 5173 --strictPort"
+  },
+  "dependencies": {
+    "lit": "2.7.6"
+  },
+  "devDependencies": {
+    "vite": "4.4.2",
+    "running-at": "0.3.22"
+  }
+}

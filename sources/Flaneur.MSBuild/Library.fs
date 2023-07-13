@@ -33,6 +33,8 @@ type LaunchTask() =
   [<Required>]
   member val Command = null with get, set
 
+  member val WorkingDirectory = null with get, set
+
   override this.Execute() =
     if String.IsNullOrWhiteSpace this.Command then
       this.Log.LogError ($"LaunchTask requires a non-empty Command parameter.")
@@ -46,7 +48,8 @@ type LaunchTask() =
         StartInfo = new ProcessStartInfo (
           CreateNoWindow = false,
           FileName = shell,
-          Arguments = String.concat " " args
+          Arguments = String.concat " " args,
+          WorkingDirectory = this.WorkingDirectory
         )
       )
       do kill <- proc.Dispose
