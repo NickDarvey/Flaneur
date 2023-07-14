@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
+		<!-- https://github.com/MoiraeSoftware/myriad/issues/39#issuecomment-639129388 -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<DebugType>embedded</DebugType>
+		<ArtifactsDir>$(SolutionDir)artifacts</ArtifactsDir>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageOutputPath>$(ArtifactsDir)</PackageOutputPath>
+		<!-- https://learn.microsoft.com/en-us/visualstudio/msbuild/tutorial-custom-task-code-generation?view=vs-2022#bundle-dependencies-into-the-package -->
+		<!-- This target will run when MSBuild is collecting the files to be packaged, and we'll implement it below. This property controls the dependency list for this packaging process, so by adding our custom property we hook ourselves into the process in a supported way. -->
+		<TargetsForTfmSpecificBuildOutput>
+			$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
+		</TargetsForTfmSpecificBuildOutput>
+		<!-- This property tells MSBuild where the root folder of the package's build assets should be. Because we are not a library package, we should not pack to 'lib'. Instead, we choose 'tasks' by convention. -->
+		<BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
+		<!-- NuGet does validation that libraries in a package are exposed as dependencies, but we _explicitly_ do not want that behavior for MSBuild tasks. They are isolated by design. Therefore we ignore this specific warning. -->
+		<NoWarn>NU5100</NoWarn>
+		<GenerateDependencyFile>true</GenerateDependencyFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FSharp.Core" Version="7.0.300" />
+		<PackageReference Include="Myriad.Core" Version="0.8.2" />
+		<PackageReference Include="Myriad.Sdk" Version="0.8.2" ExcludeAssets="build" GeneratePathProperty="true" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Compile Include="Generators.fs" />
+		<Content Include="Flaneur.Remoting.MSBuild.project.props">
+			<Pack>false</Pack>
+		</Content>
+		<Content Include="Flaneur.Remoting.MSBuild.package.props">
+			<Pack>true</Pack>
+			<PackagePath>build/Flaneur.Remoting.MSBuild.props</PackagePath>
+		</Content>
+		<Content Include="Flaneur.Remoting.MSBuild.targets">
+			<Pack>true</Pack>
+			<PackagePath>build</PackagePath>
+		</Content>
+		<!--
+			Workaround for Myriad SDK not having a buildTransitive folder
+			https://github.com/NuGet/Home/wiki/Allow-package%2D%2Dauthors-to-define-build-assets-transitive-behavior
+		-->
+		<Content Include="$(PkgMyriad_Sdk)/build/*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<LinkBase>Myriad/build</LinkBase>
+			<PackagePath>tools/myriad/build</PackagePath>
+		</Content>
+		<Content Include="$(PkgMyriad_Sdk)/tools/**/*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<LinkBase>Myriad/tools</LinkBase>
+			<PackagePath>tools/myriad/tools</PackagePath>
+		</Content>
+	</ItemGroup>
+	
+	<Target Name="CleanArtifacts" AfterTargets="AfterClean">
+		<RemoveDir Directories="$(ArtifactsDir)" />
+	</Target>
+
+	<!-- This is the target we defined above. It's purpose is to add all of our PackageReference and ProjectReference's runtime assets to our package output.  -->
+	<Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+		<ItemGroup>
+			<!-- The TargetPath is the path inside the package that the source file will be placed. This is already precomputed in the ReferenceCopyLocalPaths items' DestinationSubPath, so reuse it here. -->
+			<BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+		</ItemGroup>
+	</Target>
+	
+	<!-- This target adds the generated deps.json file to our package output -->
+	<Target Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput" BeforeTargets="BuiltProjectOutputGroup" Condition=" '$(GenerateDependencyFile)' == 'true'">
+
+		<ItemGroup>
+			<BuiltProjectOutputGroupOutput Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" FinalOutputPath="$(ProjectDepsFilePath)" />
+		</ItemGroup>
+	</Target>
+
+</Project>

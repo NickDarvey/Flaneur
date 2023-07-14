@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<ItemGroup>
+		<MyriadSdkGenerator Include="$(FlaneurAssemblyPath)" />
+		<!-- TODO: Can we allow FlaneurGeneratedFile to automatically add the generated file following the source? -->
+		<!--<Compile Include="@(Compile->Metadata('FlaneurGeneratedFile'))">
+			<MyriadFile>%(Compile.Identity)</MyriadFile>
+		</Compile>-->
+		<Compile Update="@(Compile->HasMetadata('FlaneurSourceFile'))">
+			<MyriadFile>%(Compile.FlaneurSourceFile)</MyriadFile>
+		</Compile>
+	</ItemGroup>
+
+	<PropertyGroup>
+		<MyriadConfigFile>$(BaseIntermediateOutputPath)/_.toml</MyriadConfigFile>
+	</PropertyGroup>
+
+	<ImportGroup Condition="Exists('$(FlaneurMyriadSdkPath)')">
+		<Import Project="$(FlaneurMyriadSdkPath)/build/Myriad.Sdk.props" />
+		<Import Project="$(FlaneurMyriadSdkPath)/build/Myriad.Sdk.targets" />
+	</ImportGroup>
+
+</Project>

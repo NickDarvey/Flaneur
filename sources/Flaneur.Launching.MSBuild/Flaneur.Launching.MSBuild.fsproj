@@ -3,9 +3,6 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
-	</PropertyGroup>
-
-	<PropertyGroup>
 		<ArtifactsDir>$(SolutionDir)artifacts</ArtifactsDir>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageOutputPath>$(ArtifactsDir)</PackageOutputPath>
@@ -22,25 +19,25 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="FSharp.Core" Version="7.0.300" />
+		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.6.3" PrivateAssets="all"  ExcludeAssets="Runtime" />
+	</ItemGroup>
+	
+	<ItemGroup>
 		<Compile Include="Tasks.fs" />
-		<Content Include="Flaneur.MSBuild.project.props">
+		<Content Include="Flaneur.Launching.MSBuild.project.props">
 			<Pack>false</Pack>
 		</Content>
-		<Content Include="Flaneur.MSBuild.package.props">
+		<Content Include="Flaneur.Launching.MSBuild.package.props">
 			<Pack>true</Pack>
-			<PackagePath>build/Flaneur.MSBuild.props</PackagePath>
+			<PackagePath>build/Flaneur.Launching.MSBuild.props</PackagePath>
 		</Content>
-		<Content Include="Flaneur.MSBuild.targets">
+		<Content Include="Flaneur.Launching.MSBuild.targets">
 			<Pack>true</Pack>
 			<PackagePath>build</PackagePath>
 		</Content>
 	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="FSharp.Core" Version="7.0.300" />
-		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.6.3" PrivateAssets="All" ExcludeAssets="Runtime" />
-	</ItemGroup>
-
+	
 	<Target Name="CleanArtifacts" AfterTargets="AfterClean">
 		<RemoveDir Directories="$(ArtifactsDir)" />
 	</Target>
