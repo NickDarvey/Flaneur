@@ -5,9 +5,18 @@
 		<TargetFramework>net7.0-ios</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+
+		<!-- Display name -->
+		<ApplicationTitle>Brinkworks Flaneur</ApplicationTitle>
+		<!-- App Identifier -->
+		<ApplicationId>works.brink.Flaneur.app</ApplicationId>
+		<ApplicationIdGuid>25f39401-8c74-4bc9-abeb-61c13bdb1fd7</ApplicationIdGuid>
+
 		<FlaneurLaunchUrlCommand>npm run -s print:start-url</FlaneurLaunchUrlCommand>
 		<FlaneurLaunchCommand>npm run start</FlaneurLaunchCommand>
 		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
+
+		
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -31,9 +40,19 @@
 		<RestoreSources Condition="'$(FlaneurTestWith)' == 'package'">../../artifacts;https://api.nuget.org/v3/index.json</RestoreSources>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
+      <CodesignProvision Condition="'$(CodesignProvision)'==''">VS: works.brink.flaneur.app Development</CodesignProvision>
+    </PropertyGroup>
+
+	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
+	  <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.MSBuild" />
-		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.MSBuild/Flaneur.MSBuild.fsproj" />
+		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.MSBuild/Flaneur.MSBuild.fsproj">
+		  <Private>false</Private>
+		</ProjectReference>
 	</ItemGroup>
 
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
