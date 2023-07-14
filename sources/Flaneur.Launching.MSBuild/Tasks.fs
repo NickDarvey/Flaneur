@@ -1,4 +1,4 @@
-﻿namespace Flaneur.MSBuild
+﻿namespace Flaneur.Launching.MSBuild
 
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
