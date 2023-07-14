@@ -1,7 +1,6 @@
-﻿namespace Flaneur.Remoting.MSBuild
+﻿namespace Flaneur.Remoting
 
 open Myriad.Core
-open Flaneur.Remoting
 
 [<MyriadGenerator(nameof FlaneurRemotingGenerator)>]
 type FlaneurRemotingGenerator() =

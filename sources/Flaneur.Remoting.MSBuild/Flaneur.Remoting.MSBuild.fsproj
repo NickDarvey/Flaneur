@@ -22,13 +22,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!--
-			Use the version of FSharp.Core specified by Myriad.Core.
-			(Myriad.Core 0.8.2 -> Fantomas.Core 5.0.6 -> Fantomas.FCS 5.0.6 -> FSharp.Core (>= 6.0.6))
-			Our DLL will be loaded by Myriad when it's invoked via the tools folder which contains this version.
-		-->
-		<PackageReference Include="FSharp.Core" Version="6.0.6" />
-		<PackageReference Include="Myriad.Core" Version="0.8.2" />
 		<PackageReference Include="Myriad.Sdk" Version="0.8.2" ExcludeAssets="build" GeneratePathProperty="true" />
 	</ItemGroup>
 	
@@ -59,6 +52,12 @@
 			<LinkBase>Myriad/tools</LinkBase>
 			<PackagePath>tools/myriad/tools</PackagePath>
 		</Content>
+	</ItemGroup>
+	
+	<ItemGroup />
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\Flaneur.Remoting\Flaneur.Remoting.fsproj" />
 	</ItemGroup>
 	
 	<Target Name="CleanArtifacts" AfterTargets="AfterClean">
