@@ -1,4 +1,9 @@
-namespace Services
+module Services
 
-type Cat = 
-  abstract Meow : unit -> string
+open System
+
+type SearchResult = {URI: string; Titlse: string}
+
+type RemoteServices = 
+  abstract search: term:string -> offset: int -> count: int -> IObservable<SearchResult list>
+  abstract login: unit -> IObservable<unit> 
