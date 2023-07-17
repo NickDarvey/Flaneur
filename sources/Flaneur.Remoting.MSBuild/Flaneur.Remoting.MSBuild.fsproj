@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
-	</PropertyGroup>
-
-	<PropertyGroup>
+		<!-- https://github.com/MoiraeSoftware/myriad/issues/39#issuecomment-639129388 -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<DebugType>embedded</DebugType>
 		<ArtifactsDir>$(SolutionDir)artifacts</ArtifactsDir>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageOutputPath>$(ArtifactsDir)</PackageOutputPath>
@@ -22,25 +22,44 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Tasks.fs" />
-		<Content Include="Flaneur.MSBuild.project.props">
+		<PackageReference Include="Myriad.Sdk" Version="0.8.2" ExcludeAssets="build" GeneratePathProperty="true" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Compile Include="Generators.fs" />
+		<Content Include="Flaneur.Remoting.MSBuild.project.props">
 			<Pack>false</Pack>
 		</Content>
-		<Content Include="Flaneur.MSBuild.package.props">
+		<Content Include="Flaneur.Remoting.MSBuild.package.props">
 			<Pack>true</Pack>
-			<PackagePath>build/Flaneur.MSBuild.props</PackagePath>
+			<PackagePath>build/Flaneur.Remoting.MSBuild.props</PackagePath>
 		</Content>
-		<Content Include="Flaneur.MSBuild.targets">
+		<Content Include="Flaneur.Remoting.MSBuild.targets">
 			<Pack>true</Pack>
 			<PackagePath>build</PackagePath>
 		</Content>
+		<!--
+			Workaround for Myriad SDK not having a buildTransitive folder
+			https://github.com/NuGet/Home/wiki/Allow-package%2D%2Dauthors-to-define-build-assets-transitive-behavior
+		-->
+		<Content Include="$(PkgMyriad_Sdk)/build/*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<LinkBase>Myriad/build</LinkBase>
+			<PackagePath>tools/myriad/build</PackagePath>
+		</Content>
+		<Content Include="$(PkgMyriad_Sdk)/tools/**/*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<LinkBase>Myriad/tools</LinkBase>
+			<PackagePath>tools/myriad/tools</PackagePath>
+		</Content>
 	</ItemGroup>
-
+	
+	<ItemGroup />
+	
 	<ItemGroup>
-		<PackageReference Include="FSharp.Core" Version="7.0.300" />
-		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.6.3" PrivateAssets="All" ExcludeAssets="Runtime" />
+	  <ProjectReference Include="..\Flaneur.Remoting\Flaneur.Remoting.fsproj" />
 	</ItemGroup>
-
+	
 	<Target Name="CleanArtifacts" AfterTargets="AfterClean">
 		<RemoveDir Directories="$(ArtifactsDir)" />
 	</Target>

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<FlaneurAssemblyDir>../tasks/netstandard2.0</FlaneurAssemblyDir>
+		<FlaneurAssemblyPath>../tasks/netstandard2.0/Flaneur.Launching.MSBuild.dll</FlaneurAssemblyPath>
 	</PropertyGroup>
 </Project>
