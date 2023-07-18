@@ -23,6 +23,20 @@ module Example =
 
       SynLongIdent.CreateFromLongIdent ident
 
+    let extractLetDecl ast = 
+      let (SynModuleOrNamespace(_, _, _, declarations, _, _, _, _, _)) = 
+        match ast with
+        | ParsedInput.ImplFile (ParsedImplFileInput (_name, _isScript, _qualifiedNameOfFile, _scopedPragmas, _hashDirectives, modules, _g, _)) ->
+          modules |> List.head 
+        | _ -> invalidOp "Cannot find root namespace or module"
+
+      declarations 
+      |> List.choose (
+        function 
+        | SynModuleDecl.Let (a,b,c) -> SynModuleDecl.Let(a,b,c) |> Some
+        | _ -> None
+      )
+
     let rec private extractArgs (synType: SynType) (args: List<SynLongIdent>) = 
       match synType with 
       | SynType.Fun(argType,returnType,_,_) -> 
@@ -57,7 +71,6 @@ module Example =
           | _ -> invalidOp "extracServiceSignatures only support Unspecified type interface with abstract method"
         (componentIdent, funcSignature)
       )
-
 
   let createServiceEndPoint (serviceIdent: Ident) = serviceIdent.idText
 
