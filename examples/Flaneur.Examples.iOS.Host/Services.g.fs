@@ -12,7 +12,13 @@ type Serializer =
 
 let resolve (serializer: Serializer) (services: RemoteServices) (url: string) (args: List<string>) =
     match url, args with
-    | "search", [a;a1;a2] -> services.search (serializer.deserialize a)  (serializer.deserialize a)   |> Observable.map serializer.serialize
+    | "search", [ a0; a1; a2 ] ->
+        services.search
+            (serializer.deserialize a0)
+            (serializer.deserialize a1)
+            (serializer.deserialize a2)
+            |>
+            Observable.map serializer.serialize
     | "login", [] -> services.login () |> Observable.map serializer.serialize
     | _, _ -> invalidOp "missing case"
 

@@ -8,9 +8,55 @@ module Example =
   let extensions = [ ".fs" ]
   let defaultRange = FSharp.Compiler.Text.range.Zero
 
-  let getServiceModule (ast:ParsedInput) : string = "Services"
 
-  let serializerInterfaceDeclaration = 
+  module Extract = 
+
+    let rootNsOrModuleIdent (ast:ParsedInput) = 
+      let (SynModuleOrNamespace(ident, _, _, _, _, _, _, _, _)) = 
+        match ast with
+        | ParsedInput.ImplFile (ParsedImplFileInput (_name, _isScript, _qualifiedNameOfFile, _scopedPragmas, _hashDirectives, modules, _g, _)) ->
+          modules |> List.head 
+        | _ -> invalidOp "Cannot find root namespace or module"
+
+      SynLongIdent.CreateFromLongIdent ident
+
+    let rec private extractArgs (synType: SynType) (args: List<SynLongIdent>) = 
+      match synType with 
+      | SynType.Fun(argType,returnType,_,_) -> 
+        match argType with 
+        | SynType.LongIdent(ident) -> 
+          let newArgs = args @ [ident]
+          extractArgs returnType newArgs
+        | e -> invalidOp $"Unsupported args types {e}"
+      | _ -> args
+
+    let serviceSignatures ast =
+      Ast.extractTypeDefn ast 
+      |> List.map (fun (_, typeDefs) -> 
+        typeDefs |> List.filter (fun t -> Ast.hasAttribute<RequireQualifiedAccessAttribute> t))
+      |> List.filter (List.isEmpty >> not)
+      |> List.concat 
+      |> List.map (fun typeDef -> 
+        let (SynTypeDefn(info, typeRepr, _,_,_,_)) = typeDef
+        let (SynComponentInfo(_,_,_, componentIdent,_,_,_,_)) = info
+        let funcSignature = 
+          match typeRepr with 
+          | SynTypeDefnRepr.ObjectModel(_, members,_) -> 
+            members |> List.map (
+              function
+              | SynMemberDefn.AbstractSlot (slotSig, _, _) -> 
+                let (SynValSig(_, ident, _, synType, _,_,_,_,_,_,_,_)) = slotSig
+                let (SynIdent(ident,_)) = ident
+                (ident, (extractArgs synType List.empty))
+              | _ -> invalidOp "No abstract function found"
+            )
+          | _ -> invalidOp "extracServiceSignatures only support Unspecified type interface with abstract method"
+        (componentIdent, funcSignature)
+      )
+
+  let createServiceEndPoint (serviceIdent: Ident) = serviceIdent.idText
+
+  let private serializerInterfaceDeclaration = 
     let memberFlags: SynMemberFlags = {
       IsInstance = false
       IsDispatchSlot = false
@@ -86,7 +132,29 @@ module Example =
     )
     SynModuleDecl.Types([typeDef], defaultRange)
 
-  let generateResolve serviceType (services: (string * int) list) = 
+  let private hasNoArg (args: SynLongIdent list) =
+    if List.length args > 1 then false else
+    let (SynLongIdent.SynLongIdent(ident, _,_)) = List.head args
+    let t = ident |> List.head 
+    t.idText = "unit"
+
+  let rec private createApplicativeFunc func argGen count = 
+    if count < 0 then func else
+
+    SynExpr.App (
+      ExprAtomicFlag.NonAtomic,
+      false,
+      createApplicativeFunc func argGen (count - 1),
+      argGen count,
+      defaultRange
+    )
+    
+  let generateResolve serviceIdent (services: (Ident * SynLongIdent list) list) = 
+    let createNamedSynPat count = 
+      Array.zeroCreate count 
+      |> Array.mapi (fun index _ -> SynPat.CreateNamed (Ident.Create $"a{index}"))
+      |> Array.toList
+
     let binding = SynBinding(
       None, 
       SynBindingKind.Normal, 
@@ -107,7 +175,7 @@ module Example =
           SynPat.Paren(
             SynPat.CreateTyped(
               SynPat.Named(SynIdent.SynIdent(Ident.Create "services", None), true, None, defaultRange),
-              SynType.LongIdent(SynLongIdent.Create [serviceType])),
+              SynType.LongIdent(SynLongIdent.CreateFromLongIdent serviceIdent)),
             defaultRange
           )
           SynPat.Paren(
@@ -137,14 +205,16 @@ module Example =
           defaultRange),
         [
           yield! services 
-          |> List.map (fun (serviceEndPoint, argCount) -> 
+          |> List.map (fun (serviceIdent, args) -> 
+            let serviceEndPoint = createServiceEndPoint serviceIdent
+            let serviceHasNoArgs = hasNoArg args
+            let argsCount = if serviceHasNoArgs then 0 else List.length args
             SynMatchClause.Create(
               SynPat.Tuple(
                 false, 
                 [
                   SynPat.Const (SynConst.CreateString serviceEndPoint, defaultRange)
-                  // TODO: recursively generate args
-                  SynPat.ArrayOrList (false, [], defaultRange)
+                  SynPat.ArrayOrList (false, createNamedSynPat argsCount, defaultRange)
                 ],
                 defaultRange
                 ),
@@ -152,34 +222,31 @@ module Example =
               SynExpr.App(
                 ExprAtomicFlag.NonAtomic,
                 false,
-                SynExpr.App (
+                SynExpr.App(
                   ExprAtomicFlag.NonAtomic,
                   false,
-                  // TODO: make this generate function application recursively with the number of args
-                  SynExpr.App (
-                    ExprAtomicFlag.NonAtomic,
-                    false,
-                    SynExpr.LongIdent (
+                  (if serviceHasNoArgs then 
+                    SynExpr.App (
+                      ExprAtomicFlag.NonAtomic, 
                       false, 
-                      SynLongIdent.Create ["services"; serviceEndPoint], 
-                      None, 
-                      defaultRange
-                    ),
-                    SynExpr.Paren(
-                      SynExpr.App(
-                        ExprAtomicFlag.NonAtomic,
-                        false,
-                        SynExpr.LongIdent (false, SynLongIdent.Create ["serializer" ; "deserialize"], None, defaultRange),
-                        SynExpr.Ident (Ident.Create "a"),
-                        defaultRange
-                      ),
-                      defaultRange,
-                      Some defaultRange,
-                      defaultRange
-                    ),
-                    defaultRange
-                  ),
-                  SynExpr.CreatePipeRight,
+                      SynExpr.LongIdent (false, SynLongIdent.Create ["services"; serviceEndPoint], None, defaultRange),
+                      SynExpr.CreateUnit,
+                      defaultRange)
+                  else
+                    (createApplicativeFunc
+                      (SynExpr.LongIdent (false, SynLongIdent.Create ["services"; serviceEndPoint], None, defaultRange))
+                      (fun index -> 
+                          SynExpr.App (
+                            ExprAtomicFlag.NonAtomic,
+                            false,
+                            SynExpr.LongIdent (false, SynLongIdent.Create ["serializer"; "deserialize"], None, defaultRange),
+                            SynExpr.Ident (Ident.Create $"a{index}"),
+                            defaultRange
+                          )
+                          |> SynExpr.CreateParen)
+                       (argsCount - 1)
+                    )),
+                  SynExpr.Ident (Ident.Create "|>"),
                   defaultRange
                 ),
                 SynExpr.App (
@@ -233,30 +300,17 @@ module Example =
       |> Async.RunSynchronously
       |> Array.head
 
-    let typeDef = 
-      Ast.extractTypeDefn ast
-      |> List.map (fun (indentation, typeDefs) -> 
-        typeDefs |> List.map (fun typeDef -> 
-        let (SynTypeDefn(synComponentInfo, synTypeDefnRepr, _members, _implicitCtor, _, _)) = typeDef
-        let (SynComponentInfo(attributes, typeParams, constraints, recordId,_,_,_,_)) = synComponentInfo
-        SynTypeDefn.CreateFromRepr(recordId |> List.last, SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.TypeAbbrev(ParserDetail.Ok,SynType.CreateLongIdent("string"), FSharp.Compiler.Text.range.Zero),FSharp.Compiler.Text.range.Zero))
-        )
-      )
-      |> List.concat
-      
-
-    let moduleDeclarations = [
-      getServiceModule ast |> SynModuleDecl.CreateOpen
-      serializerInterfaceDeclaration
-      generateResolve "RemoteServices" [ ("search", 3) ; ("login", 0) ]
-    ]
-
-    //SynModuleOrNamespace.SynModuleOrNamespace([Ident.Create "example"], false, SynModuleOrNamespaceKind.DeclaredNamespace, [d], )
     let modu = 
       SynModuleOrNamespace.CreateModule(
       Ident.CreateLong "Flaneur.Remoting.Services", 
       false, 
-      moduleDeclarations)
+      [
+        SynOpenDeclTarget.ModuleOrNamespace (Extract.rootNsOrModuleIdent ast, defaultRange) |> SynModuleDecl.CreateOpen
+        serializerInterfaceDeclaration
+        yield! (
+          Extract.serviceSignatures ast 
+          |> List.map (fun (serviceIdent, funDef) -> generateResolve serviceIdent funDef))
+      ])
 
     Output.Ast [modu]
 
