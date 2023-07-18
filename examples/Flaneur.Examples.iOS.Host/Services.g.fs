@@ -10,15 +10,15 @@ type Serializer =
     abstract serialize: 'a -> 'b
     abstract deserialize: 'b -> 'a
 
-let resolve (serializer: Serializer) (services: RemoteServices) (url: string) (args: List<string>) =
+let resolve (serializer: Serializer) (url: string) (args: List<string>) =
     match url, args with
     | "search", [ a0; a1; a2 ] ->
-        services.search
+        Services.service.search
             (serializer.deserialize a0)
             (serializer.deserialize a1)
             (serializer.deserialize a2)
             |>
             Observable.map serializer.serialize
-    | "login", [] -> services.login () |> Observable.map serializer.serialize
+    | "login", [] -> Services.service.login () |> Observable.map serializer.serialize
     | _, _ -> invalidOp "missing case"
 

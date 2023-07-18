@@ -4,10 +4,13 @@ open Myriad.Core
 open Myriad.Core.Ast
 open FSharp.Compiler.Syntax
 
+module Attributes = 
+  type RemoteInterfaceAttribute() = inherit System.Attribute()
+  type RemoteImplementationAttribute() = inherit System.Attribute()
+
 module Example =
   let extensions = [ ".fs" ]
   let defaultRange = FSharp.Compiler.Text.range.Zero
-
 
   module Extract = 
 
@@ -30,12 +33,13 @@ module Example =
         | e -> invalidOp $"Unsupported args types {e}"
       | _ -> args
 
+
     let serviceSignatures ast =
       Ast.extractTypeDefn ast 
       |> List.map (fun (_, typeDefs) -> 
-        typeDefs |> List.filter (fun t -> Ast.hasAttribute<RequireQualifiedAccessAttribute> t))
+        typeDefs |> List.filter (fun t -> Ast.hasAttribute<Attributes.RemoteInterfaceAttribute> t))
       |> List.filter (List.isEmpty >> not)
-      |> List.concat 
+      |> List.concat
       |> List.map (fun typeDef -> 
         let (SynTypeDefn(info, typeRepr, _,_,_,_)) = typeDef
         let (SynComponentInfo(_,_,_, componentIdent,_,_,_,_)) = info
@@ -53,6 +57,7 @@ module Example =
           | _ -> invalidOp "extracServiceSignatures only support Unspecified type interface with abstract method"
         (componentIdent, funcSignature)
       )
+
 
   let createServiceEndPoint (serviceIdent: Ident) = serviceIdent.idText
 
