@@ -1,24 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>netstandard2.1</TargetFramework>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<Compile Include="Library.fs" />
-		<Compile Include="Generators.fs" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<!--
-			Use the version of FSharp.Core specified by Myriad.Core.
-			(Myriad.Core 0.8.2 -> Fantomas.Core 5.0.6 -> Fantomas.FCS 5.0.6 -> FSharp.Core (>= 6.0.6))
-			Our DLL will be loaded by Myriad when it's invoked via the tools folder which contains this version.
-		-->
-		<PackageReference Include="FSharp.Core" Version="6.0.6" />
-		<PackageReference Include="Myriad.Core" Version="0.8.2" />
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Include="Library.fs" />
+  </ItemGroup>
 
 </Project>

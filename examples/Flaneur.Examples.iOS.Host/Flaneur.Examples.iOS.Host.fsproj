@@ -58,6 +58,8 @@
 		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.fsproj">
 			<Private>false</Private>
 		</ProjectReference>
+		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Remoting" />
+		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.Remoting/Flaneur.Remoting.fsproj"/>
 	</ItemGroup>
 
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
