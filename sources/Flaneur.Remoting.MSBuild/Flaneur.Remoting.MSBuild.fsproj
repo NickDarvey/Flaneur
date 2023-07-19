@@ -56,7 +56,6 @@
 	
 	<ItemGroup>
 	  <ProjectReference Include="..\Flaneur.Remoting.Myriad.Plugin\Flaneur.Remoting.Myriad.Plugin.fsproj" />
-	  <ProjectReference Include="..\Flaneur.Remoting\Flaneur.Remoting.Myriad.Plugin.fsproj" />
 	</ItemGroup>
 	
 	<Target Name="CleanArtifacts" AfterTargets="AfterClean">
