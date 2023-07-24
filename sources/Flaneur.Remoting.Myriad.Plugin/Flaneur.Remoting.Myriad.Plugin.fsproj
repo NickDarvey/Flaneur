@@ -7,7 +7,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Library.fs" />
+		<Compile Include="ProxyGenerator.fs" />
+		<Compile Include="HandlerGenerator.fs" />
 		<Compile Include="Generators.fs" />
 	</ItemGroup>
 

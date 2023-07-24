@@ -1,6 +1,4 @@
-﻿<Project>
-	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net7.0-ios</TargetFramework>
 		<OutputType>Exe</OutputType>
@@ -16,12 +14,11 @@
 		<FlaneurLaunchCommand>npm run start</FlaneurLaunchCommand>
 		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
 
-		
+
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Services.fs" />
-		<Compile Include="Services.g.fs" FlaneurSourceFile="Services.fs" />
+		<Compile Include="Services.g.fs" FlaneurRemotingSourceFile="../Flaneur.Examples.iOS.App/Services.fs" FlaneurRemotingGenerators="FlaneurRemotingHandlerGenerator" />
 		<Compile Include="WebAppViewController.fs" />
 		<Compile Include="AppDelegate.fs" />
 		<Compile Include="SceneDelegate.fs" />
@@ -31,44 +28,17 @@
 	<ItemGroup>
 		<PackageReference Include="FSharp.Data.LiteralProviders" Version="1.0.3" PrivateAssets="all" />
 	</ItemGroup>
-
-	<PropertyGroup>
-		<!-- For testing via package:
-			(You will need to delete the package from the nuget cache with each change. 
-			Probably that means deleting `~/.nuget/Flaneur.*.MSBuild`.) -->
-		<!--<FlaneurTestWith>package</FlaneurTestWith>-->
-		<FlaneurTestWith>project</FlaneurTestWith>
-		<RestoreSources Condition="'$(FlaneurTestWith)' == 'package'">../../artifacts;https://api.nuget.org/v3/index.json</RestoreSources>
-	</PropertyGroup>
-
+	<ItemGroup>
+		<ProjectReference Include="../Flaneur.Examples.iOS.App/Flaneur.Examples.iOS.App.fsproj" />
+	</ItemGroup>
 	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
-      <CodesignProvision Condition="'$(CodesignProvision)'==''">VS: works.brink.flaneur.app Development</CodesignProvision>
-    </PropertyGroup>
+		<CodesignProvision Condition="'$(CodesignProvision)'==''">VS: works.brink.flaneur.app Development</CodesignProvision>
+	</PropertyGroup>
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
-	  <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+		<CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Launching.MSBuild" />
-		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.Launching.MSBuild/Flaneur.Launching.MSBuild.fsproj">
-			<Private>false</Private>
-		</ProjectReference>
-		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Remoting.MSBuild" />
-		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.fsproj">
-			<Private>false</Private>
-		</ProjectReference>
-		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Remoting" />
-		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.Remoting/Flaneur.Remoting.fsproj"/>
-	</ItemGroup>
 
-	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-
-	<ImportGroup Condition="'$(FlaneurTestWith)' == 'project'">
-		<Import Project="../../sources/Flaneur.Launching.MSBuild/Flaneur.Launching.MSBuild.project.props" />
-		<Import Project="../../sources/Flaneur.Launching.MSBuild/Flaneur.Launching.MSBuild.targets" />
-		<Import Project="../../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.project.props" />
-		<Import Project="../../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.targets" />
-	</ImportGroup>
 
 </Project>

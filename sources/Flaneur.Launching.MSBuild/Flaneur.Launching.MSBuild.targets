@@ -50,17 +50,4 @@
 		<LaunchTask Command="%(Launch.Identity)" WorkingDirectory="%(Launch.WorkingDirectory)" />
 	</Target>
 
-
-	<ItemGroup>
-		<MyriadSdkGenerator Include="$(FlaneurAssemblyPath)" />
-		<Compile Update="@(Compile->HasMetadata('FlaneurFile'))">
-			<MyriadFile>%(Compile.FlaneurFile)</MyriadFile>
-		</Compile>
-	</ItemGroup>
-
-	<ImportGroup Condition="Exists('$(FlaneurMyriadSdkPath)')">
-		<Import Project="$(FlaneurMyriadSdkPath)/build/Myriad.Sdk.props" />
-		<Import Project="$(FlaneurMyriadSdkPath)/build/Myriad.Sdk.targets" />
-	</ImportGroup>
-
 </Project>

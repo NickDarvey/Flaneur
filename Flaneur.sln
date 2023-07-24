@@ -8,6 +8,9 @@ EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Launching.MSBuild", "sources\Flaneur.Launching.MSBuild\Flaneur.Launching.MSBuild.fsproj", "{1761C1A1-4D42-414E-885C-8F600AC16548}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{93388F1A-2F9F-45C8-B92F-1DA55412E343}"
+	ProjectSection(SolutionItems) = preProject
+		examples\Directory.Build.props = examples\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{E5CB2578-A5A1-4E9F-AC40-A8F30CC09A1F}"
 	ProjectSection(SolutionItems) = preProject
@@ -27,7 +30,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Remoting.MSBuild", 
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Remoting.Myriad.Plugin", "sources\Flaneur.Remoting.Myriad.Plugin\Flaneur.Remoting.Myriad.Plugin.fsproj", "{621AC1DF-55FD-4B99-99FF-C5BA062A5F97}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flaneur.Remoting", "sources\Flaneur.Remoting\Flaneur.Remoting.fsproj", "{62A038AD-627D-44B6-A804-9419A176D3DC}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Remoting", "sources\Flaneur.Remoting\Flaneur.Remoting.fsproj", "{62A038AD-627D-44B6-A804-9419A176D3DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
