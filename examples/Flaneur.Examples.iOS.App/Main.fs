@@ -1,4 +1,4 @@
-module Lit.TodoMVC.App
+module Flaneur.Examples.iOS.App.Main
 
 open Lit
 

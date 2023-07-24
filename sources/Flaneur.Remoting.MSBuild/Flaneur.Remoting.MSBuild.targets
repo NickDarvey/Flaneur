@@ -7,8 +7,11 @@
 		<!--<Compile Include="@(Compile->Metadata('FlaneurGeneratedFile'))">
 			<MyriadFile>%(Compile.Identity)</MyriadFile>
 		</Compile>-->
-		<Compile Update="@(Compile->HasMetadata('FlaneurSourceFile'))">
-			<MyriadFile>%(Compile.FlaneurSourceFile)</MyriadFile>
+		<Compile Update="@(Compile->HasMetadata('FlaneurRemotingSourceFile'))">
+			<MyriadFile>%(Compile.FlaneurRemotingSourceFile)</MyriadFile>
+		</Compile>
+		<Compile Update="@(Compile->HasMetadata('FlaneurRemotingGenerators'))">
+			<Generators>%(Compile.FlaneurRemotingGenerators)</Generators>
 		</Compile>
 	</ItemGroup>
 
