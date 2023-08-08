@@ -6,31 +6,38 @@
     <title>Flaneur</title>
 </head>
 <body>
-    Hello, web.
-    <script>
+    Hello, web deberopuru.
+
+    <button id="foo">Foo</button>
+    <button id="fooWith">FooWith</button>
+
+    <script type="text/javascript">
         // setup AbortController
         const controller = new AbortController();
         // signal to pass to fetch
         const signal = controller.signal;
-
-        // fetch as usual
-        fetch('flaneur://test', { signal })
-            .then((response) => response.body.pipeThrough(new TextDecoderStream()).getReader())
-            .then(async (reader) => {
-                console.log("Started");
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) {
-                        console.log("Completed");
-                        break;
+        document.querySelector("#foo").addEventListener("click", () => invoke("foo"))
+        document.querySelector("#fooWith").addEventListener("click", () => invoke("fooWith?bar=1&t=2"))
+        function invoke(endPoint) {
+            fetch(`flaneur://localhost/${endPoint}`, { signal })
+                .then((response) => response.body.pipeThrough(new TextDecoderStream()).getReader())
+                .then(async (reader) => {
+                    console.log("Started");
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) {
+                            console.log("Completed");
+                            break;
+                        }
+                        console.log("Received", value);
                     }
-                    console.log("Received", value);
-                }
-                reader.releaseLock();
-            })
-            .catch(console.error);
+                    reader.releaseLock();
+                })
+                .catch(console.error);
 
-        setTimeout(() => controller.abort(), 5000);
+            setTimeout(() => controller.abort(), 5000);
+        }
+        
     </script>
 </body>
 </html>
