@@ -21,6 +21,13 @@ type ServiceObserver (urlSchemeTask: IWKUrlSchemeTask) =
     member _.OnNext value =
       urlSchemeTask.DidReceiveData (NSData.FromString value)
 
+// Custom URL scheme communication will be stopped by Webkit when CORS policy
+// is tripped. To allow CORS communication, CORS headers need to be presented on
+// both request to and response from the original origin. IWKUrlSchemeHandler
+// uses IWKUrlSchemeTask which does not set any response headers which means we
+// cannot comply with Webkit CORS policy. We have to work around this by ensure
+// assets (html, css, etc.) and api call has the same origin. Thus, we use a
+// single url scheme to deliver assets as well as making API call.
 type FlaneurSchemeHandler (proxy: Proxy<string,string>) =
   inherit NSObject ()
 
@@ -33,6 +40,9 @@ type FlaneurSchemeHandler (proxy: Proxy<string,string>) =
     let path = NSBundle.MainBundle.PathForResource (name, ext, dir)
     let file, error = NSData.FromFile (path, NSDataReadingOptions.Mapped)
     if isNull error then
+      // testing with Safari inspector reveals that
+      // urlSchemeTask does not set headers information so we
+      // use NSUrlResponse instead of NSHttpUrlResponse
       let response = new NSUrlResponse(urlSchemeTask.Request.Url, "text/html",(nativeint file.Length), "iso-8859-1")
       urlSchemeTask.DidReceiveResponse response
       urlSchemeTask.DidReceiveData file
@@ -70,7 +80,6 @@ type FlaneurSchemeHandler (proxy: Proxy<string,string>) =
         subscription.Dispose ()
       
 type private LaunchUrl = Env<"FLANEUR_LAUNCH_URL", "flaneur://app">
-
 
 type WebAppViewController (proxy) =
   inherit UIViewController()
