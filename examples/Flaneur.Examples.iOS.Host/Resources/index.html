@@ -6,20 +6,23 @@
     <title>Flaneur</title>
 </head>
 <body>
-    Hello, web deberopuru.
+    Hello, web deberopuru.hello
 
     <button id="foo">Foo</button>
     <button id="fooWith">FooWith</button>
 
     <script type="text/javascript">
-        // setup AbortController
-        const controller = new AbortController();
-        // signal to pass to fetch
-        const signal = controller.signal;
-        document.querySelector("#foo").addEventListener("click", () => invoke("foo"))
-        document.querySelector("#fooWith").addEventListener("click", () => invoke("fooWith?bar=1&t=2"))
+        document.querySelector("#foo").addEventListener("click", () => invoke("foo"));
+        document.querySelector("#fooWith").addEventListener("click", () => invoke("fooWith?bar=1&t=2"));
+        const abortController = new AbortController();
+
         function invoke(endPoint) {
-            fetch(`flaneur://localhost/${endPoint}`, { signal })
+            const options = {
+                keepalive: true,
+                signal: abortController.signal,
+                method: "GET"
+            };
+            fetch(`flaneur://app/${endPoint}`, options)
                 .then((response) => response.body.pipeThrough(new TextDecoderStream()).getReader())
                 .then(async (reader) => {
                     console.log("Started");
@@ -34,8 +37,6 @@
                     reader.releaseLock();
                 })
                 .catch(console.error);
-
-            setTimeout(() => controller.abort(), 5000);
         }
         
     </script>

@@ -6,117 +6,102 @@ open WebKit
 open System
 open System.IO
 open FSharp.Data.LiteralProviders
+open FSharp.Control
 
-type BundleWKUrlSchemeHandler () =
+
+type ServiceObserver (urlSchemeTask: IWKUrlSchemeTask) =
+  interface IObserver<string> with
+    member _.OnCompleted () =
+      urlSchemeTask.DidFinish ()
+
+    member _.OnError error =
+      urlSchemeTask.DidReceiveData (NSData.FromString error.Message)
+      urlSchemeTask.DidFinish ()
+
+    member _.OnNext value =
+      urlSchemeTask.DidReceiveData (NSData.FromString value)
+
+type ServiceHandler() =
   inherit NSObject ()
 
-  interface IWKUrlSchemeHandler with
-    member _.StartUrlSchemeTask (webView, urlSchemeTask) =
-
-      let url = urlSchemeTask.Request.Url.RelativePath
-      let url = if String.IsNullOrEmpty url then "index.html" else url
-      let name = Path.GetFileNameWithoutExtension url
-      let ext = Path.GetExtension url
-      let dir = Path.GetDirectoryName url
-      let path = NSBundle.MainBundle.PathForResource (name, ext, dir)
-      let file, error = NSData.FromFile (path, NSDataReadingOptions.Mapped)
-      if isNull error then
-        let headers = new NSMutableDictionary<NSString, NSString> ()
-        headers.Add (NSString.op_Explicit "Content-Length", NSString.op_Explicit $"{file.Length}")
-        headers.Add (NSString.op_Explicit "Content-Type", NSString.op_Explicit "text/html")
-        headers.Add (NSString.op_Explicit "Cache-Control", NSString.op_Explicit "no-cache, max-age=0, must-revalidate, no-store")
-        let response = new NSHttpUrlResponse (urlSchemeTask.Request.Url, (nativeint 200), "HTTP/1.1", headers)
-        urlSchemeTask.DidReceiveResponse response
-        urlSchemeTask.DidReceiveData file
-        urlSchemeTask.DidFinish ()
-      else
-        let error = error.LocalizedDescription
-        let headers = new NSMutableDictionary<NSString, NSString> ()
-        headers.Add (NSString.op_Explicit "Content-Length", NSString.op_Explicit $"{error.Length}")
-        headers.Add (NSString.op_Explicit "Content-Type", NSString.op_Explicit "text/plain")
-        headers.Add (NSString.op_Explicit "Cache-Control", NSString.op_Explicit "no-cache, max-age=0, must-revalidate, no-store")
-        let response = new NSHttpUrlResponse (urlSchemeTask.Request.Url, (nativeint 404), "HTTP/1.1", headers)
-        urlSchemeTask.DidReceiveResponse response
-        urlSchemeTask.DidReceiveData (NSData.FromString error)
-        urlSchemeTask.DidFinish ()
-      ()
-    member _.StopUrlSchemeTask (webView, urlSchemeTask) =
-      let asdf = urlSchemeTask.Request.Url
-      printfn $"stop {asdf}"
-      ()
-
-
-type ServiceHandler () =
-  inherit NSObject ()
-
-  let toParams (url: NSUrl) = 
-    try
-      let namedValue = System.Web.HttpUtility.ParseQueryString url.Query
-      namedValue.AllKeys
-      |> Array.map (fun key -> key, namedValue.Get key)
-      |> Some 
-    with
-    | :? System.ArgumentNullException -> None
-
-  let toServiceName (url: NSUrl) = url.RelativePath
-
+  let mutable subscriptions = List.empty<IDisposable>
+  
   let handle serviceName args =
     match serviceName, args with
-    | "/foo", None -> "unit"
+    | "/foo", None ->
+      asyncSeq { yield "1" }
+      |> AsyncSeq.toObservable
     | "/fooWith", Some pr -> 
       for (k, v) in pr do
         printfn $"fooWith key= {k} ; value = {v}"
-      "bar"
+      asyncSeq {
+        yield "1"
+        System.Threading.Thread.Sleep 1000
+        yield "2"
+      }
+      |> AsyncSeq.toObservable
     | _ ->
-      invalidOp "unknown service"
+    invalidOp "unknown service"
+
+  let responseResource (urlSchemeTask: IWKUrlSchemeTask) (url:String)=
+    let name = Path.GetFileNameWithoutExtension url
+    let ext = Path.GetExtension url
+    let dir = Path.GetDirectoryName url
+    let path = NSBundle.MainBundle.PathForResource (name, ext, dir)
+    let file, error = NSData.FromFile (path, NSDataReadingOptions.Mapped)
+    if isNull error then
+      let response = new NSUrlResponse(urlSchemeTask.Request.Url, "text/html",(nativeint file.Length), "iso-8859-1")
+      urlSchemeTask.DidReceiveResponse response
+      urlSchemeTask.DidReceiveData file
+      urlSchemeTask.DidFinish ()
+    else
+      let error = error.LocalizedDescription
+      let response = new NSUrlResponse(urlSchemeTask.Request.Url, "text/html",(nativeint error.Length), "iso-8859-1")
+      urlSchemeTask.DidReceiveResponse response
+      urlSchemeTask.DidReceiveData (NSData.FromString error)
+      urlSchemeTask.DidFinish ()
+    ()
 
   interface IWKUrlSchemeHandler with
     member _.StartUrlSchemeTask (webView, urlSchemeTask) =
-      let url = urlSchemeTask.Request.Url 
-      printfn $"ServiceHandler.StartUrlSchemeTask with url {url}"
-      if isNull url then () else
 
-      let serviceName = toServiceName url
-      let args = toParams url
-      printfn $"{urlSchemeTask.Request.Url.Query}"
-      printfn $"start {serviceName}"
+      let serviceName = urlSchemeTask.Request.Url.RelativePath
+      if String.IsNullOrEmpty serviceName then
+        responseResource urlSchemeTask "index.html"
+      else
+        let args =
+          try
+            let namedValue = System.Web.HttpUtility.ParseQueryString urlSchemeTask.Request.Url.Query
+            namedValue.AllKeys
+            |> Array.map (fun key -> key, namedValue.Get key)
+            |> Some 
+          with
+          | :? System.ArgumentNullException -> None
 
-      let result = handle serviceName args
+        let result = handle serviceName args
+        let res = new NSHttpUrlResponse(urlSchemeTask.Request.Url, "text/plain", (nativeint 102400),"iso-8859-1")
+        urlSchemeTask.DidReceiveResponse res  
+        let obs = result.Subscribe (ServiceObserver urlSchemeTask)
+        subscriptions <- subscriptions @ [obs]
 
-      let headers = new NSMutableDictionary<NSString, NSString> ()
-      headers.Add (NSString.op_Explicit "Content-Type", NSString.op_Explicit "text/plain")
-      headers.Add (NSString.op_Explicit "Cache-Control", NSString.op_Explicit "no-cache, max-age=0, must-revalidate, no-store")
-      let res = new NSHttpUrlResponse(url, (nativeint 200), "HTTP/1.1", headers)
       
-      urlSchemeTask.DidReceiveResponse res
-      
-      urlSchemeTask.DidReceiveData (NSData.FromString result)
-      urlSchemeTask.DidFinish ()
-      ()
-
     member _.StopUrlSchemeTask (webView, urlSchemeTask) =
-      let asdf = urlSchemeTask.Request.Url
-      printfn $"stop {asdf}"
-      ()
-
-type private LaunchUrl = Env<"FLANEUR_LAUNCH_URL", "bundle://">
+      for subscription in subscriptions do
+        subscription.Dispose ()
+      
+type private LaunchUrl = Env<"FLANEUR_LAUNCH_URL", "flaneur://app">
 
 type WebAppViewController () =
   inherit UIViewController()
-
   let cfg = new WKWebViewConfiguration()
-  do cfg.SetUrlSchemeHandler(new BundleWKUrlSchemeHandler (), urlScheme = "bundle")
   do cfg.SetUrlSchemeHandler(new ServiceHandler (), urlScheme = "flaneur")
   let wv = new WKWebView (frame = CoreGraphics.CGRect.Null, configuration = cfg)
-
+  do wv.Inspectable <- true
+  
   override this.LoadView() =
     this.View <- wv
 
-  override this.ViewDidLoad () =
-    let req = new NSUrlRequest (new NSUrl (LaunchUrl.Value))
-    let nav = wv.LoadRequest req
-    //let file = NSBundle.MainBundle.PathForResource ("index", "html")
-    //let content = System.IO.File.ReadAllText file
-    //let res = wv.LoadHtmlString (content, null);
-
-    ()
+  override _.ViewDidLoad () =
+    new NSMutableUrlRequest (new NSUrl (LaunchUrl.Value))
+    |> wv.LoadRequest
+    |> ignore
