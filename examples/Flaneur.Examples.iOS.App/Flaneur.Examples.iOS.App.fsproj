@@ -6,11 +6,17 @@
 
 	<ItemGroup>
 		<Content Include="package.json" />
+		<Compile Include="App.fs" />
 		<Compile Include="Services.fs" />
-		<Compile Include="Main.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Fable.Lit" Version="1.4.2" />
+		<PackageReference Include="Fable.Fetch" Version="2.6.0">
+		  <GeneratePathProperty></GeneratePathProperty>
+		</PackageReference>
+		<PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1">
+		  <GeneratePathProperty></GeneratePathProperty>
+		</PackageReference>
 	</ItemGroup>
 </Project>
