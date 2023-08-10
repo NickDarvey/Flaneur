@@ -14,7 +14,6 @@
 		<FlaneurLaunchCommand>npm run start</FlaneurLaunchCommand>
 		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
 
-
 	</PropertyGroup>
 
 	<ItemGroup>

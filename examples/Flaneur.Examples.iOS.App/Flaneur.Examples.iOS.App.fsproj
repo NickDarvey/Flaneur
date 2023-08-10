@@ -6,8 +6,8 @@
 
 	<ItemGroup>
 		<Content Include="package.json" />
-		<Compile Include="App.fs" />
 		<Compile Include="Services.fs" />
+		<Compile Include="App.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

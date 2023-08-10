@@ -70,7 +70,12 @@ type FlaneurSchemeHandler (proxy: Proxy<string,string>) =
           | :? System.ArgumentNullException -> Array.empty
 
         let result = proxy(serviceName, args)
-        let res = new NSHttpUrlResponse(urlSchemeTask.Request.Url, "text/plain", (nativeint 102400),"iso-8859-1")
+        let headers = new NSMutableDictionary<NSString, NSString> ()
+        headers.Add (NSString.op_Explicit "Content-Type", NSString.op_Explicit "text/plain")
+        headers.Add (NSString.op_Explicit "Access-Control-Allow-Origin", NSString.op_Explicit "*")
+        headers.Add (NSString.op_Explicit "Cache-Control", NSString.op_Explicit "no-cache, max-age=0, must-revalidate, no-store")
+        let res = new NSHttpUrlResponse (urlSchemeTask.Request.Url, (nativeint 200), "HTTP/1.1", headers)
+        
         urlSchemeTask.DidReceiveResponse res  
         let obs = result.Subscribe (ServiceObserver urlSchemeTask)
         subscriptions <- subscriptions @ [obs]
