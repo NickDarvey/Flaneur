@@ -3,24 +3,32 @@
 open UIKit
 open Foundation
 open FSharp.Control
+open Flaneur.Remoting.IOS
+open Thoth.Json.Net
 
+// TODO: move this into share lib between host and app
+type Animal = { Name: string; Age: int }
+    
 
 [<Register(nameof AppDelegate)>]
 type AppDelegate() =
     inherit UIApplicationDelegate()
-    
-    let proxy (serviceName, args)=
+
+    let proxy =
+      fun (serviceName,args) ->
         match serviceName, args with
         | "/foo", [||] ->
-          asyncSeq { yield "1" }
+          asyncSeq { yield {| Value=1 |} }
           |> AsyncSeq.toObservable
+          |> Observable.map (Encode.Auto.generateEncoder () >> fun x -> x.ToString())
         | "/fooWith", [|_; _|] -> 
           asyncSeq {
-            yield "1"
+            yield { Name="Daisy"; Age=15 }
             System.Threading.Thread.Sleep 1000
-            yield "2"
+            yield { Name="Fluffle"; Age=9 }
           }
           |> AsyncSeq.toObservable
+          |> Observable.map (Encode.Auto.generateEncoder () >> fun x -> x.ToString())
         | _ ->
         invalidOp "unknown service"
        

@@ -12,11 +12,11 @@ let MyApp() =
     let fooProxy = FooProxy "flaneur://app"
     let runFoo () =
       let obs = fooProxy.Foo ()
-      obs.Subscribe(fun e -> console.log($"foo: {e}"))
+      obs.Subscribe(fun e -> console.log($"foo: %A{e.Value}"))
 
     let runFooWith () =
       let obs = fooProxy.FooWith ("a",1)
-      obs.Subscribe(fun e -> console.log($"foowith: {e}"))
+      obs.Subscribe(fun e -> console.log($"foowith: %A{e}"))
 
     html $"""
       <h1>Hello qewrqwer</h1>
