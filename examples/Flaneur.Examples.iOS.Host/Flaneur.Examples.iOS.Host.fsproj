@@ -18,7 +18,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Services.g.fs" FlaneurRemotingSourceFile="../Flaneur.Examples.iOS.App/Services.fs" FlaneurRemotingGenerators="FlaneurRemotingHandlerGenerator" />
 		<Compile Include="WebAppViewController.fs" />
 		<Compile Include="AppDelegate.fs" />
 		<Compile Include="SceneDelegate.fs" />
