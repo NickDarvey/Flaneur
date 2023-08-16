@@ -29,7 +29,7 @@
 
 	<Target Name="SetLaunchUrl">
 		<Exec
-			Condition="'$(FlaneurLaunchUrlCommand)' != '' and '$(FlaneurLaunchUrl)' == ''"
+			Condition="'$(FlaneurLaunchUrlCommand)' != ''"
 			Command="$(FlaneurLaunchUrlCommand)"
 			WorkingDirectory="$(FlaneurWorkingDirectory)"
 			ConsoleToMSBuild="true">
