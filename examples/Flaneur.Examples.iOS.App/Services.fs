@@ -1,4 +1,4 @@
-﻿module Lit.TodoMVC.Services
+﻿module Flaneur.Examples.iOS.Services
 open Flaneur.Remoting.Client
 open Browser
 

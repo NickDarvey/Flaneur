@@ -2,7 +2,7 @@ module Flaneur.Examples.iOS.App.Main
 
 open Lit
 open Browser
-open Services
+open Flaneur.Examples.iOS.Services
 
 [<LitElement("my-app")>]
 let MyApp() = 

@@ -6,7 +6,7 @@
     <Content Include="package.json" />
     <Compile Include="Flaneur.Remoting.Client.fs" />
     <Compile Include="Services.fs" />
-    <Compile Include="App.fs" />
+    <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fable.Lit" Version="1.4.2" />
