@@ -39,15 +39,15 @@
 	</Target>
 	
 	<Target Name="RunLaunchTasks" Condition="'$(IsLaunch)' == 'true'">
-	<!--	<ItemGroup>
+		<ItemGroup>
 			<Launch
 				Condition="'$(FlaneurLaunchCommand)' != ''"
 				Include="$(FlaneurLaunchCommand)"
 				WorkingDirectory="$(FlaneurWorkingDirectory)" />
 		</ItemGroup>
 		<Message Importance="high" Text="Launching command '%(Launch.Identity)'" />
-		 https://github.com/dotnet/roslyn/blob/5100eeedfe43c45b53fc298d6341d4d52e0d735a/src/Compilers/Core/MSBuildTask/Microsoft.Managed.Core.targets#L85-L96 
+		<!-- https://github.com/dotnet/roslyn/blob/5100eeedfe43c45b53fc298d6341d4d52e0d735a/src/Compilers/Core/MSBuildTask/Microsoft.Managed.Core.targets#L85-L96 -->
 		<LaunchTask Command="%(Launch.Identity)" WorkingDirectory="%(Launch.WorkingDirectory)" />
-	-->
 	</Target>
+
 </Project>
