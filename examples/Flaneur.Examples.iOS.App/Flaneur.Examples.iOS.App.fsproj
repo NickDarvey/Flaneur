@@ -13,4 +13,7 @@
 	<ItemGroup>
 		<PackageReference Include="Fable.Lit" Version="1.4.2" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Include="index.html" />
+	</ItemGroup>
 </Project>
