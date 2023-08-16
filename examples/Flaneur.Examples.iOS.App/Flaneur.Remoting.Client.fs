@@ -4,13 +4,9 @@ open Browser
 
 type ProxyInvoke<'Result> = string * string list -> System.IObservable<'Result>
 
-type Encoder<'Encoded> =
-  abstract Encode : 'Value -> 'Encoded
+type Encoder<'Value, 'Encoded> = 'Value -> 'Encoded
+type Decoder<'Encoded> = System.Type -> 'Encoded -> Result<obj, string>
 
-type Decoder<'Encoded,'Value> =
-  abstract Decode : 'Encoded -> 'Value
-
-type Handler<'Parameter,'Result,'Value> = Encoder<'Parameter> -> Decoder<'Parameter,'Value> -> string (*action name*) -> 'Parameter list -> System.IObservable<'Result>
 
 module Handler = 
   open Fetch
