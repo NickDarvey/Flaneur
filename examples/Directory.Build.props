@@ -13,15 +13,15 @@
 
 	<ImportGroup Condition="'$(FlaneurTestWith)' == 'project'">
 		<Import Project="$(MSBuildThisFileDirectory)/../sources/Flaneur.Launching.MSBuild/Flaneur.Launching.MSBuild.project.props" />
-		<Import Project="$(MSBuildThisFileDirectory)/../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.project.props" />
+		<!--<Import Project="$(MSBuildThisFileDirectory)/../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.project.props" />-->
 	</ImportGroup>
 
 	<!-- We want project ref behaviour to be similar to package ref behaviour. That is, targets are imported late. -->
 	<PropertyGroup Condition="'$(FlaneurTestWith)' == 'project'">
 		<AfterMicrosoftNETSdkTargets>
 			$(AfterMicrosoftNETSdkTargets);
-			$(MSBuildThisFileDirectory)/../sources/Flaneur.Launching.MSBuild/Flaneur.Launching.MSBuild.targets;
-			$(MSBuildThisFileDirectory)/../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.targets
+			$(MSBuildThisFileDirectory)/../sources/Flaneur.Launching.MSBuild/Flaneur.Launching.MSBuild.targets<!--;
+			$(MSBuildThisFileDirectory)/../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.targets-->
 		</AfterMicrosoftNETSdkTargets>
 	</PropertyGroup>
 
@@ -30,12 +30,12 @@
 		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="$(MSBuildThisFileDirectory)/../sources/Flaneur.Launching.MSBuild/Flaneur.Launching.MSBuild.fsproj">
 			<Private>false</Private>
 		</ProjectReference>
-		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Remoting.MSBuild" />
+		<!--<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Remoting.MSBuild" />
 		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="$(MSBuildThisFileDirectory)/../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.fsproj">
 			<Private>false</Private>
 		</ProjectReference>
 		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Remoting" />
-		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="$(MSBuildThisFileDirectory)/../sources/Flaneur.Remoting/Flaneur.Remoting.fsproj" />
+		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="$(MSBuildThisFileDirectory)/../sources/Flaneur.Remoting/Flaneur.Remoting.fsproj" />-->
 	</ItemGroup>
 
 </Project>

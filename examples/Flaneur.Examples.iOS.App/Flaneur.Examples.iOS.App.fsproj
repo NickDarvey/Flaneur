@@ -7,7 +7,6 @@
 	<ItemGroup>
 		<Content Include="package.json" />
 		<Compile Include="Services.fs" />
-		<Compile Include="Services.g.fs" FlaneurRemotingSourceFile="Services.fs" FlaneurRemotingGenerators="FlaneurRemotingProxyGenerator" />
 		<Compile Include="Main.fs" />
 	</ItemGroup>
 
