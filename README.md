@@ -20,6 +20,9 @@ Code generation for Flaneur.
 	   ```
 
     1. Uncomment `Flaneur.Remoting` references in `Directory.Build.props`.
+
+	1. Add a project reference from `Flanuer.Examples.iOS.Host.fsproj` to `Flanuer.Examples.iOS.App.fsproj`.
+
 	1. Attempt a release build for iOS.
 	   
        Last time we had it integrated, the trimmer was trying to analyse Myriad and failing. If it does the same this time, investigate how to exclude the references from the build output.

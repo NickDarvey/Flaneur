@@ -27,9 +27,7 @@
 	<ItemGroup>
 		<PackageReference Include="FSharp.Data.LiteralProviders" Version="1.0.3" PrivateAssets="all" />
 	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="../Flaneur.Examples.iOS.App/Flaneur.Examples.iOS.App.fsproj" />
-	</ItemGroup>
+	
 	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
 		<CodesignProvision Condition="'$(CodesignProvision)'==''">VS: works.brink.flaneur.app Development</CodesignProvision>
 	</PropertyGroup>
