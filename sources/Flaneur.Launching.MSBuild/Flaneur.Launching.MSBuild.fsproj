@@ -3,6 +3,8 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
+		<!-- https://stackoverflow.com/a/65100547/1259408 -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<ArtifactsDir>$(SolutionDir)artifacts</ArtifactsDir>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageOutputPath>$(ArtifactsDir)</PackageOutputPath>
