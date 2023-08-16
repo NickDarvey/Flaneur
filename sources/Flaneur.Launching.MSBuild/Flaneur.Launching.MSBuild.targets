@@ -5,8 +5,9 @@
 
 	<PropertyGroup>
 		<BuildDependsOn>
-			RunPreLaunchTasks;
-			$(BuildDependsOn)
+			SetLaunchUrl;
+			$(BuildDependsOn);
+			RunLaunchTasks
 		</BuildDependsOn>
 	</PropertyGroup>
 
@@ -26,7 +27,7 @@
 		<FlaneurWorkingDirectory>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(FlaneurWorkingDirectory)))</FlaneurWorkingDirectory>
 	</PropertyGroup>
 
-	<Target Name="RunPreLaunchTasks" Condition="'$(IsLaunch)' == 'true'">
+	<Target Name="SetLaunchUrl">
 		<Exec
 			Condition="'$(FlaneurLaunchUrlCommand)' != '' and '$(FlaneurLaunchUrl)' == ''"
 			Command="$(FlaneurLaunchUrlCommand)"
