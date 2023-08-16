@@ -7,10 +7,10 @@ type ProxyInvoke<'Result> = string * string list -> System.IObservable<'Result>
 type Encoder<'Encoded> =
   abstract Encode : 'Value -> 'Encoded
 
-type Decoder<'Encoded> =
+type Decoder<'Encoded,'Value> =
   abstract Decode : 'Encoded -> 'Value
 
-type Handler<'Parameter,'Result> = Encoder<'Parameter> -> Decoder<'Parameter> -> string (*action name*) -> 'Parameter list -> System.IObservable<'Result>
+type Handler<'Parameter,'Result,'Value> = Encoder<'Parameter> -> Decoder<'Parameter,'Value> -> string (*action name*) -> 'Parameter list -> System.IObservable<'Result>
 
 module Handler = 
   open Fetch
@@ -43,30 +43,31 @@ module Handler =
   [<Emit("$0.body.pipeThrough(new TextDecoderStream()).getReader()")>]
   let private getResponseBodyReader (response: Response) : JS.Promise<ReadableStreamDefaultReader<string>> = jsNative
       
-  let create serviceOrigin argEncode resultDecode serviceName args =
-    let endPoint =
-      if List.length args = 0 then
-        $"{serviceOrigin}/{serviceName}"
-      else
-        let queryParam = 
-          args
-          |> List.mapi (fun index value -> $"a{index}={argEncode value}")
-          |> String.concat "&"
-        $"{serviceOrigin}/{serviceName}?{queryParam}"
+  let create serviceOrigin =
+    fun argEncode resultDecode serviceName args ->
+      let endPoint =
+        if List.length args = 0 then
+          $"{serviceOrigin}/{serviceName}"
+        else
+          let queryParam = 
+            args
+            |> List.mapi (fun index value -> $"a{index}={argEncode value}")
+            |> String.concat "&"
+          $"{serviceOrigin}/{serviceName}?{queryParam}"
 
-    fetch endPoint List.empty
-    |> Promise.bind getResponseBodyReader
-    |> Async.AwaitPromise
-    |> Async.map (fun reader -> asyncSeq {
-      let mutable notFinished = true
-      while notFinished do 
-        let! result = reader.read () |> Async.AwaitPromise    
-        if not result.``done`` then
-          yield (resultDecode result.value)
-        else ()
-        notFinished <- not result.``done``
-      reader.releaseLock ()
-    })
-    |> Async.flattenAsyncSeq
-    |> AsyncSeq.toObservable
+      fetch endPoint List.empty
+      |> Promise.bind getResponseBodyReader
+      |> Async.AwaitPromise
+      |> Async.map (fun reader -> asyncSeq {
+        let mutable notFinished = true
+        while notFinished do 
+          let! result = reader.read () |> Async.AwaitPromise    
+          if not result.``done`` then
+            yield (resultDecode result.value)
+          else ()
+          notFinished <- not result.``done``
+        reader.releaseLock ()
+      })
+      |> Async.flattenAsyncSeq
+      |> AsyncSeq.toObservable
 

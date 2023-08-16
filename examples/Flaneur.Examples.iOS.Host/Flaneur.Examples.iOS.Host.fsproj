@@ -16,6 +16,7 @@
 		<FlaneurLaunchCommand>npm run start</FlaneurLaunchCommand>
 		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
 
+
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -28,10 +29,10 @@
 	<ItemGroup>
 		<PackageReference Include="FSharp.Data.LiteralProviders" Version="1.0.3" PrivateAssets="all" />
 		<PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1">
-		  <GeneratePathProperty></GeneratePathProperty>
+			<GeneratePathProperty></GeneratePathProperty>
 		</PackageReference>
 		<PackageReference Include="Thoth.Json.Net" Version="11.0.0">
-		  <GeneratePathProperty></GeneratePathProperty>
+			<GeneratePathProperty></GeneratePathProperty>
 		</PackageReference>
 	</ItemGroup>
 	
@@ -43,18 +44,6 @@
 		<CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
 	</PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-	  <CreatePackage>false</CreatePackage>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-	  <CreatePackage>false</CreatePackage>
-	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.MSBuild" />
-		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="../../sources/Flaneur.MSBuild/Flaneur.MSBuild.fsproj">
-		  <Private>false</Private>
-		</ProjectReference>
-	</ItemGroup>
 
 
 </Project>
