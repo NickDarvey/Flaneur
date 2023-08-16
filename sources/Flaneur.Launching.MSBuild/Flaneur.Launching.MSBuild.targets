@@ -27,7 +27,7 @@
 		<FlaneurWorkingDirectory>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(FlaneurWorkingDirectory)))</FlaneurWorkingDirectory>
 	</PropertyGroup>
 
-	<Target Name="SetLaunchUrl">
+	<Target Name="SetLaunchUrl" Condition="'$(IsLaunch)' == 'true'">
 		<Exec
 			Condition="'$(FlaneurLaunchUrlCommand)' != '' and '$(FlaneurLaunchUrl)' == ''"
 			Command="$(FlaneurLaunchUrlCommand)"
