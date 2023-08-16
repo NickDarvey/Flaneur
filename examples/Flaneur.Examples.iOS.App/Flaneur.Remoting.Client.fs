@@ -40,6 +40,8 @@ module Handler =
       yield! y
     }
 
+  // TODO: Extract and improve bindings for ReadableStream API
+  // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
   [<Emit("$0.body.pipeThrough(new TextDecoderStream()).getReader()")>]
   let private getResponseBodyReader (response: Response) : JS.Promise<ReadableStreamDefaultReader<string>> = jsNative
       

@@ -24,7 +24,7 @@ type AppDelegate() =
         | "/fooWith", [|_; _|] -> 
           asyncSeq {
             yield { Name="Daisy"; Age=15 }
-            System.Threading.Thread.Sleep 1000
+            do! Async.Sleep 1000
             yield { Name="Fluffle"; Age=9 }
           }
           |> AsyncSeq.toObservable
