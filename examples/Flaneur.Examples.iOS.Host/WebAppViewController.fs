@@ -69,7 +69,7 @@ type WebAppViewController () =
   //do cfg.SetUrlSchemeHandler(new Bloop (), urlScheme = "flaneur")
   do cfg.SetUrlSchemeHandler(new BundleWKUrlSchemeHandler (), urlScheme = "bundle")
   let wv = new WKWebView (frame = CoreGraphics.CGRect.Null, configuration = cfg)
-
+  do wv.Inspectable <- true
   override this.LoadView() =
     this.View <- wv
 
