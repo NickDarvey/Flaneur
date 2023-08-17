@@ -4,50 +4,128 @@
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.SetEnvTask" AssemblyFile="$(FlaneurAssemblyPath)" />
 
 	<PropertyGroup>
+		<CollectBundleResourcesDependsOn>
+			$(CollectBundleResourcesDependsOn);
+			RunLaunchBundle;
+			IncludeBundleAssets
+		</CollectBundleResourcesDependsOn>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<BuildDependsOn>
 			SetLaunchUrl;
 			$(BuildDependsOn);
-			RunLaunchTasks
+			RunLaunchHttp
 		</BuildDependsOn>
 	</PropertyGroup>
-
+	
 	<PropertyGroup>
 		<!--
 			Run via Visual Studio, IsImplicitlyTriggeredBuild is true
 			https://github.com/dotnet/roslyn/blob/5100eeedfe43c45b53fc298d6341d4d52e0d735a/src/Compilers/Core/MSBuildTask/Microsoft.Managed.Core.targets#L85-L96
 		-->
-		<IsLaunch Condition="'$(IsLaunch)' == '' and '$(IsImplicitlyTriggeredBuild)' == true">true</IsLaunch>
-		
+		<_IsHttpLaunch Condition="'$(_IsHttpLaunch)' == '' and '$(IsImplicitlyTriggeredBuild)' == true">true</_IsHttpLaunch>
+
 		<!--
 			Run via `dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID`, _MlaunchWaitForExit is set
 			https://github.com/xamarin/xamarin-macios/blob/43ae6c749407e47fdf5fa07295119b87f7328ea6/dotnet/targets/Xamarin.Shared.Sdk.targets#L1860-L1925
 		-->
-		<IsLaunch Condition="'$(IsLaunch)' == '' and '$(_MlaunchWaitForExit)' != ''">true</IsLaunch>
+		<_IsHttpLaunch Condition="'$(_IsHttpLaunch)' == '' and '$(_MlaunchWaitForExit)' != ''">true</_IsHttpLaunch>
 
 		<FlaneurWorkingDirectory>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(FlaneurWorkingDirectory)))</FlaneurWorkingDirectory>
+		<FlaneurBundleDirectory>flaneur</FlaneurBundleDirectory>
+		<FlaneurUseHttp Condition="$(FlaneurUseHttp) != false and $(_IsHttpLaunch) == true">true</FlaneurUseHttp>
 	</PropertyGroup>
+
+
+	<!--
+		Allow specifying bundle assets in project.
+			
+		I tried making this easier to use by prepending the FlaneurWorkingDirectory and generating a link
+		but I couldn't get it to work with wildcards which is probably a common way to specify assets.
+			
+		I couldn't find a workaround nor documentation aside from being mentioned in this answer:
+		> Further, MSBuild can't compose a path with a wildcard inside the Include attribute and evaluate
+		> it at the same time, so you need a trick to first compose the full path separately, then feed
+		> it into the Include attribute. 
+		https://stackoverflow.com/a/5188096/1259408
+	-->
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios')) == true">
+		<BundleResource Include="@(FlaneurBundleAsset)" />
+	</ItemGroup>
+
+	<Target Name="IncludeBundleAssets" Condition="'$(FlaneurUseHttp)' != 'true'">
+		<!-- TODO: Allow bundle assets set from property FlaneurBundleAssets for CLI usage -->
+		
+		<Exec
+			Condition="'$(FlaneurBundleAssetsCommand)' != ''"
+			Command="$(FlaneurBundleAssetsCommand)"
+			WorkingDirectory="$(FlaneurWorkingDirectory)"
+			EchoOff="true"
+			ConsoleToMSBuild="true">
+			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurBundleAssets" />
+		</Exec>
+
+		<ItemGroup>
+			<_FlaneurBundleExpandedAsset Include="$(FlaneurBundleAssets)" />
+			<FlaneurBundleAsset Include="@(_FlaneurBundleExpandedAsset -> '$(FlaneurWorkingDirectory)/%(Identity)')">
+				<Link>$(FlaneurBundleDirectory)/$([MSBuild]::MakeRelative ('$(FlaneurWorkingDirectory)', '%(Identity)'))</Link>
+			</FlaneurBundleAsset>
+		</ItemGroup>
+
+		<Message Importance="high" Text="Flaneur is bundling @(FlaneurBundleAsset->Count()) assets" />
+
+		<ItemGroup Condition="$(TargetFramework.Contains('-ios')) == true">
+			<BundleResource Include="@(FlaneurBundleAsset)" KeepDuplicates="false" />
+		</ItemGroup>
+
+	</Target>
 
 	<Target Name="SetLaunchUrl">
 		<Exec
-			Condition="'$(FlaneurLaunchUrlCommand)' != ''"
-			Command="$(FlaneurLaunchUrlCommand)"
+			Condition="'$(FlaneurHttpUrlCommand)' != '' and '$(FlaneurUseHttp)' == 'true'"
+			Command="$(FlaneurHttpUrlCommand)"
 			WorkingDirectory="$(FlaneurWorkingDirectory)"
 			ConsoleToMSBuild="true">
-			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurLaunchUrl" />
+			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurHttpUrl" />
 		</Exec>
-		<SetEnvTask Condition="'$(FlaneurLaunchUrl)' != ''" Variable="FLANEUR_LAUNCH_URL" Value="$(FlaneurLaunchUrl)" />
+
+		<Exec
+			Condition="'$(FlaneurBundleUrlCommand)' != '' and '$(FlaneurUseHttp)' != 'true'"
+			Command="$(FlaneurBundleUrlCommand)"
+			WorkingDirectory="$(FlaneurWorkingDirectory)"
+			ConsoleToMSBuild="true">
+			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurBundleUrl" />
+		</Exec>
+
+		<PropertyGroup>
+			<FlaneurHttpUrl Condition="'$(FlaneurHttpUrl)' == ''">http://localhost</FlaneurHttpUrl>
+			<FlaneurBundleUrl Condition="'$(FlaneurBundleUrl)' == ''">bundle://$(FlaneurBundleDirectory)</FlaneurBundleUrl>
+			<FlaneurUrl Condition="'$(FlaneurUseHttp)' == 'true'">$(FlaneurHttpUrl)</FlaneurUrl>
+			<FlaneurUrl Condition="'$(FlaneurUseHttp)' != 'true'">$(FlaneurBundleUrl)</FlaneurUrl>
+		</PropertyGroup>
+		<Message Importance="high" Text="Flaneur will use the URL '$(FlaneurUrl)'" />
+
+		<SetEnvTask Condition="'$(FlaneurUrl)' != ''" Variable="FLANEUR_LAUNCH_URL" Value="$(FlaneurUrl)" />
 	</Target>
-	
-	<Target Name="RunLaunchTasks" Condition="'$(IsLaunch)' == 'true'">
-		<ItemGroup>
-			<Launch
-				Condition="'$(FlaneurLaunchCommand)' != ''"
-				Include="$(FlaneurLaunchCommand)"
-				WorkingDirectory="$(FlaneurWorkingDirectory)" />
-		</ItemGroup>
-		<Message Importance="high" Text="Launching command '%(Launch.Identity)'" />
-		<!-- https://github.com/dotnet/roslyn/blob/5100eeedfe43c45b53fc298d6341d4d52e0d735a/src/Compilers/Core/MSBuildTask/Microsoft.Managed.Core.targets#L85-L96 -->
-		<LaunchTask Command="%(Launch.Identity)" WorkingDirectory="%(Launch.WorkingDirectory)" />
+
+	<Target Name="RunLaunchHttp" Condition="'$(FlaneurUseHttp)' == 'true' and '$(FlaneurHttpCommand)' != ''">
+		<Message
+			Importance="high"
+			Text="Flaneur is running HTTP command '$(FlaneurHttpCommand)' in a new window" />
+		<LaunchTask
+			Command="$(FlaneurHttpCommand)"
+			WorkingDirectory="$(FlaneurWorkingDirectory)" />
+	</Target>
+
+	<Target Name="RunLaunchBundle" Condition="'$(FlaneurUseHttp)' != 'true' and '$(FlaneurBundleCommand)' != ''">
+		<Message
+			Importance="high"
+			Text="Flaneur is running bundle command '$(FlaneurBundleCommand)'" />
+		<Exec
+			Command="$(FlaneurBundleCommand)"
+			WorkingDirectory="$(FlaneurWorkingDirectory)" />
+
 	</Target>
 
 </Project>

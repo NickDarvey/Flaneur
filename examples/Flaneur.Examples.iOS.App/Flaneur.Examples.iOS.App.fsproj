@@ -3,10 +3,10 @@
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="package.json" />
+    <None Include="package.json" />
+    <None Include="index.html" />
     <Compile Include="Services.fs" />
     <Compile Include="Main.fs" />
-    <None Include="index.html" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fable.Lit" Version="1.4.2" />
