@@ -1,10 +1,23 @@
-﻿namespace Flaneur.Examples.iOS.App.Services
+﻿module Flaneur.Examples.iOS.Services
+open Flaneur.Remoting.Client
+open Browser
+type Animal = { Name: string; Age: int }
 
-open System
+type FooService =
+  abstract Foo: unit -> System.IObservable<{|Value:int|}>
+  abstract FooWith: string * int -> System.IObservable<Animal>
 
-type SearchResult = {URI: string; Title: string}
+let FooProxy serviceOrigin (decoder : Decoder<string>) =
+  let stringEncoder x = $"{x}"
 
-type SearchService = 
-  abstract search: term:string -> offset: int -> count: int -> IObservable<SearchResult list>
-  abstract login: unit -> IObservable<unit> 
-  abstract cat : int
+  let inline decode typ str =
+    match decoder typ str with
+    | Ok result -> unbox result
+    | Error e ->
+      failwith $"Oops"
+  
+  {
+    new FooService with
+      member _.FooWith (a0:string, a1: int) = Handler.create serviceOrigin stringEncoder (decode typeof<Animal>) "fooWith" [a0; a1.ToString();]
+      member _.Foo () = Handler.create serviceOrigin stringEncoder (decode typeof<{|Value:int|}>)  "foo" []
+  }

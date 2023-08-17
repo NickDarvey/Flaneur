@@ -6,31 +6,39 @@
     <title>Flaneur</title>
 </head>
 <body>
-    Hello, web.
-    <script>
-        // setup AbortController
-        const controller = new AbortController();
-        // signal to pass to fetch
-        const signal = controller.signal;
+    Hello, web deberopuru.hello
 
-        // fetch as usual
-        fetch('flaneur://test', { signal })
-            .then((response) => response.body.pipeThrough(new TextDecoderStream()).getReader())
-            .then(async (reader) => {
-                console.log("Started");
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) {
-                        console.log("Completed");
-                        break;
+    <button id="foo">Foo</button>
+    <button id="fooWith">FooWith</button>
+
+    <script type="text/javascript">
+        document.querySelector("#foo").addEventListener("click", () => invoke("foo"));
+        document.querySelector("#fooWith").addEventListener("click", () => invoke("fooWith?bar=1&t=2"));
+        const abortController = new AbortController();
+
+        function invoke(endPoint) {
+            const options = {
+                keepalive: true,
+                signal: abortController.signal,
+                method: "GET"
+            };
+            fetch(`flaneur://app/${endPoint}`, options)
+                .then((response) => response.body.pipeThrough(new TextDecoderStream()).getReader())
+                .then(async (reader) => {
+                    console.log("Started");
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) {
+                            console.log("Completed");
+                            break;
+                        }
+                        console.log("Received", value);
                     }
-                    console.log("Received", value);
-                }
-                reader.releaseLock();
-            })
-            .catch(console.error);
-
-        setTimeout(() => controller.abort(), 5000);
+                    reader.releaseLock();
+                })
+                .catch(console.error);
+        }
+        
     </script>
 </body>
 </html>

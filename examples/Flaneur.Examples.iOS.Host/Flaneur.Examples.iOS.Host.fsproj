@@ -20,7 +20,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="WebAppViewController.fs" />
+		<Compile Include="Flaneur.Remoting.IOS.fs" />
 		<Compile Include="AppDelegate.fs" />
 		<Compile Include="SceneDelegate.fs" />
 		<Compile Include="Main.fs" />
@@ -28,6 +28,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="FSharp.Data.LiteralProviders" Version="1.0.3" PrivateAssets="all" />
+		<PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1"/>
+		<PackageReference Include="Thoth.Json.Net" Version="11.0.0" />
 	</ItemGroup>
 	
 	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
