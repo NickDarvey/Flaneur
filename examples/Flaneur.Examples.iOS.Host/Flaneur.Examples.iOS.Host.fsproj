@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="../Examples.Build.props"/>
+	<Import Project="../Examples.Build.props" />
 	
 	<PropertyGroup>
 		<TargetFramework>net7.0-ios</TargetFramework>
@@ -20,7 +20,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Flaneur.Remoting.IOS.fs" />
 		<Compile Include="AppDelegate.fs" />
 		<Compile Include="SceneDelegate.fs" />
 		<Compile Include="Main.fs" />
@@ -28,9 +27,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="FSharp.Data.LiteralProviders" Version="1.0.3" PrivateAssets="all" />
-		<PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1"/>
+		<PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1" />
 		<PackageReference Include="Thoth.Json.Net" Version="11.0.0" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../../sources/Flaneur.Remoting.iOS/Flaneur.Remoting.iOS.fsproj" />
+  </ItemGroup>
 	
 	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
 		<CodesignProvision Condition="'$(CodesignProvision)'==''">VS: works.brink.flaneur.app Development</CodesignProvision>
@@ -41,5 +44,10 @@
 	</PropertyGroup>
 
 
-
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+	  <CreatePackage>false</CreatePackage>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+	  <CreatePackage>false</CreatePackage>
+	</PropertyGroup>
 </Project>

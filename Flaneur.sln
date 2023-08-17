@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Examples.iOS.Host", "examples\Flaneur.Examples.iOS.Host\Flaneur.Examples.iOS.Host.fsproj", "{8FA10691-D5CE-4062-B22D-6BCE489A8D73}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flaneur.Examples.iOS.Host", "examples\Flaneur.Examples.iOS.Host\Flaneur.Examples.iOS.Host.fsproj", "{8FA10691-D5CE-4062-B22D-6BCE489A8D73}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Launching.MSBuild", "sources\Flaneur.Launching.MSBuild\Flaneur.Launching.MSBuild.fsproj", "{1761C1A1-4D42-414E-885C-8F600AC16548}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flaneur.Launching.MSBuild", "sources\Flaneur.Launching.MSBuild\Flaneur.Launching.MSBuild.fsproj", "{1761C1A1-4D42-414E-885C-8F600AC16548}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{93388F1A-2F9F-45C8-B92F-1DA55412E343}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,15 +23,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{BC56
 		.config\dotnet-tools.json = .config\dotnet-tools.json
 	EndProjectSection
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Examples.iOS.App", "examples\Flaneur.Examples.iOS.App\Flaneur.Examples.iOS.App.fsproj", "{F0FDE6C7-95EC-42C9-AA7A-8B3242B60184}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flaneur.Examples.iOS.App", "examples\Flaneur.Examples.iOS.App\Flaneur.Examples.iOS.App.fsproj", "{F0FDE6C7-95EC-42C9-AA7A-8B3242B60184}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sources", "sources", "{D14A4478-CDF2-4D4A-89C9-E9468C57B4A9}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Remoting.MSBuild", "sources\Flaneur.Remoting.MSBuild\Flaneur.Remoting.MSBuild.fsproj", "{A1478465-6DB1-4A58-8502-AAF651D402A9}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flaneur.Remoting.MSBuild", "sources\Flaneur.Remoting.MSBuild\Flaneur.Remoting.MSBuild.fsproj", "{A1478465-6DB1-4A58-8502-AAF651D402A9}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Remoting.Myriad.Plugin", "sources\Flaneur.Remoting.Myriad.Plugin\Flaneur.Remoting.Myriad.Plugin.fsproj", "{621AC1DF-55FD-4B99-99FF-C5BA062A5F97}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flaneur.Remoting.Myriad.Plugin", "sources\Flaneur.Remoting.Myriad.Plugin\Flaneur.Remoting.Myriad.Plugin.fsproj", "{621AC1DF-55FD-4B99-99FF-C5BA062A5F97}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Flaneur.Remoting", "sources\Flaneur.Remoting\Flaneur.Remoting.fsproj", "{62A038AD-627D-44B6-A804-9419A176D3DC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flaneur.Remoting", "sources\Flaneur.Remoting\Flaneur.Remoting.fsproj", "{62A038AD-627D-44B6-A804-9419A176D3DC}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flaneur.Remoting.iOS", "sources\Flaneur.Remoting.iOS\Flaneur.Remoting.iOS.fsproj", "{5491B107-A768-4B29-9AA4-62AC5E494D33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +67,10 @@ Global
 		{62A038AD-627D-44B6-A804-9419A176D3DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62A038AD-627D-44B6-A804-9419A176D3DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62A038AD-627D-44B6-A804-9419A176D3DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5491B107-A768-4B29-9AA4-62AC5E494D33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5491B107-A768-4B29-9AA4-62AC5E494D33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5491B107-A768-4B29-9AA4-62AC5E494D33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5491B107-A768-4B29-9AA4-62AC5E494D33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{A1478465-6DB1-4A58-8502-AAF651D402A9} = {D14A4478-CDF2-4D4A-89C9-E9468C57B4A9}
 		{621AC1DF-55FD-4B99-99FF-C5BA062A5F97} = {D14A4478-CDF2-4D4A-89C9-E9468C57B4A9}
 		{62A038AD-627D-44B6-A804-9419A176D3DC} = {D14A4478-CDF2-4D4A-89C9-E9468C57B4A9}
+		{5491B107-A768-4B29-9AA4-62AC5E494D33} = {D14A4478-CDF2-4D4A-89C9-E9468C57B4A9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D6CCE51-3586-4A29-9B82-245A1A195BF8}
