@@ -5,7 +5,6 @@ open UIKit
 open WebKit
 open System
 open System.IO
-open FSharp.Data.LiteralProviders
 
 type Proxy<'Parameter, 'Result> = string * ('Parameter array) -> IObservable<'Result>
 
@@ -78,10 +77,9 @@ type FlaneurSchemeHandler (proxy: Proxy<_, _>) =
       for subscription in subscriptions do
         subscription.Dispose ()
 
-type private LaunchUrl = Env<"FLANEUR_LAUNCH_URL", "flaneur://app">
-
-type WebAppViewController (proxy) =
+type WebAppViewController (launchUrl: NSUrl, proxy) =
   inherit UIViewController()
+
   let cfg = new WKWebViewConfiguration()
   do cfg.SetUrlSchemeHandler(new FlaneurSchemeHandler(proxy), urlScheme = "flaneur")
   let wv = new WKWebView (frame = CoreGraphics.CGRect.Null, configuration = cfg)
@@ -90,6 +88,6 @@ type WebAppViewController (proxy) =
   override this.LoadView () = this.View <- wv
   
   override _.ViewDidLoad () =
-      new NSMutableUrlRequest (new NSUrl (LaunchUrl.Value))
+      new NSUrlRequest (launchUrl)
       |> wv.LoadRequest
       |> ignore

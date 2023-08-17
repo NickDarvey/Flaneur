@@ -5,10 +5,11 @@ open Foundation
 open FSharp.Control
 open Flaneur.Remoting.IOS
 open Thoth.Json.Net
+open FSharp.Data.LiteralProviders
 
-// TODO: move this into share lib between host and app
 type Animal = { Name: string; Age: int }
-    
+
+type private LaunchUrl = Env<"FLANEUR_LAUNCH_URL", "flaneur://app">
 
 [<Register(nameof AppDelegate)>]
 type AppDelegate() =
@@ -35,10 +36,11 @@ type AppDelegate() =
     override val Window = null with get, set
 
     override this.FinishedLaunching(application: UIApplication, launchOptions: NSDictionary) =
+        let url = new NSUrl(LaunchUrl.Value)
         // create a new window instance based on the screen size
         this.Window <- new UIWindow(UIScreen.MainScreen.Bounds)
 
-        this.Window.RootViewController <- new WebAppViewController (proxy)
+        this.Window.RootViewController <- new WebAppViewController (url, proxy)
 
         this.Window.MakeKeyAndVisible()
         

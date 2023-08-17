@@ -22,7 +22,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="FSharp.Core" Version="7.0.300" />
-		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.6.3" PrivateAssets="all"  ExcludeAssets="Runtime" />
+		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.6.3" PrivateAssets="all" ExcludeAssets="Runtime" />
 	</ItemGroup>
 	
 	<ItemGroup>

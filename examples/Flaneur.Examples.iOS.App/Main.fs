@@ -9,12 +9,8 @@ let MyApp() =
     let _ = LitElement.init(fun cfg ->
         cfg.useShadowDom <- false
     )
+    let fooProxy = FooProxy "flaneur://app"
 
-    let myJsonDecoder t str : Result<obj, string> =
-      let decoder = Thoth.Json.Decode.Auto.generateBoxedDecoder t |> Thoth.Json.Decode.unboxDecoder
-      Thoth.Json.Decode.fromString decoder str
-
-    let fooProxy = FooProxy "flaneur://app" myJsonDecoder 
     let runFoo () =
       let obs = fooProxy.Foo ()
       obs.Subscribe(fun e -> console.log($"foo: %A{e.Value}"))
