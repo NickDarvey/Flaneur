@@ -6,9 +6,9 @@
   },
   "scripts": {
     "print:start-url": "node --print \"require('running-at')(5173).network\"",
-    "print:build-assets": "glob --nodir bin/wwwroot/**/* index.html",
+    "print:build-assets": "glob --nodir dist/**/*",
     "install": "dotnet tool restore",
-    "build": "dotnet fable . -o bin/wwwroot --run vite build",
+    "build": "dotnet fable . -o bin/wwwroot --run vite build --outDir dist --emptyOutDir",
     "start": "dotnet fable watch . -s -o bin/wwwroot --run vite dev --host 0.0.0.0 --port 5173 --strictPort"
   },
   "dependencies": {

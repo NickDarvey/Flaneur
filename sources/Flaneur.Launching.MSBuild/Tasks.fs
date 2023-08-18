@@ -55,6 +55,38 @@ type LaunchTask() =
       do kill <- proc.Dispose
       proc.Start ()
 
+type DeepestCommonDirectoryTask() =
+  inherit Task()
+  
+  // https://stackoverflow.com/a/24867012/1259408
+  let getLongestCommonPrefix (s : string[]) : string =
+    let mutable k = s.[0].Length
+    for i = 1 to s.Length - 1 do
+        k <- min k s.[i].Length
+        for j = 0 to k - 1 do
+            if s.[i].[j] <> s.[0].[j]
+            then k <- j
+            else ()
+    s.[0].[0..k-1]
+
+  [<Required>]
+  member val Items = Array.empty<ITaskItem> with get, set
+
+  [<Output>]
+  member val Directory = null with get, set
+
+  override this.Execute() =
+    let prefix =
+      this.Items
+      |> Array.map (fun i -> i.GetMetadata "FullPath")
+      |> getLongestCommonPrefix
+
+    let last = prefix.LastIndexOf System.IO.Path.DirectorySeparatorChar
+
+    this.Directory <- if last < 0 then "" else prefix.Substring(0, last)
+
+    true
+
 
     // https://github.com/stazz/UtilPack/blob/7d9fb1bda314c818eb9076cdb4ff1f048544b03d/Source/Code/UtilPack.MSBuild.AsyncExec/AsyncExec.cs#L27
 
@@ -63,4 +95,4 @@ type LaunchTask() =
     // means that if you build, then hit run, it'll run the build version not the launch version
     // could disable if confusing
     // https://stackoverflow.com/questions/1937702/visual-studio-run-c-project-post-build-event-even-if-project-is-up-to-date/49639051#49639051
-    // or maybe include the 'islaunch' property into the calculation of isuptodate
+    // or maybe inlude the 'islaunch' property into the calculation of isuptodate

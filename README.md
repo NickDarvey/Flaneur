@@ -2,6 +2,9 @@
 
 ## Launching
 
+> **TODO**
+> - If files have changed in the working directory, rebuild.
+
 You can configure how the host launches your wapp by setting the _Flaneur launch URL_ variable.
 
 For example, you can use a hot reload server while you're developing but use optimized bundled assets for a production release.

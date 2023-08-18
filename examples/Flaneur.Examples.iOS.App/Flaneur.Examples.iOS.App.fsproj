@@ -3,6 +3,7 @@
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="vite.config.js" />
     <None Include="package.json" />
     <None Include="index.html" />
     <Compile Include="Services.fs" />

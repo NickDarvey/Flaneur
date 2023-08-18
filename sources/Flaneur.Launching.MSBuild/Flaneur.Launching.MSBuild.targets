@@ -2,6 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.LaunchTask" AssemblyFile="$(FlaneurAssemblyPath)" />
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.SetEnvTask" AssemblyFile="$(FlaneurAssemblyPath)" />
+	<UsingTask TaskName="Flaneur.Launching.MSBuild.DeepestCommonDirectoryTask" AssemblyFile="$(FlaneurAssemblyPath)" />
 
 	<PropertyGroup>
 		<CollectBundleResourcesDependsOn>
@@ -33,7 +34,13 @@
 		<_IsHttpLaunch Condition="'$(_IsHttpLaunch)' == '' and '$(_MlaunchWaitForExit)' != ''">true</_IsHttpLaunch>
 
 		<FlaneurWorkingDirectory>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(FlaneurWorkingDirectory)))</FlaneurWorkingDirectory>
-		<FlaneurBundleDirectory>flaneur</FlaneurBundleDirectory>
+		<!--
+			TODO: Allow multiple subdirs for bundle.
+			Relative links don't seem to work in WKWebView with custom protocols so `bundle://example/wapp/index.html` that references `./assets/index.js`
+			will result in a request to `bundle://example/assets/index.js` instead of `bundle://example/wapp/assets/index.js`.
+		-->
+		<!--<FlaneurBundleDirectory>wapp</FlaneurBundleDirectory>-->
+		
 		<FlaneurUseHttp Condition="$(FlaneurUseHttp) != false and $(_IsHttpLaunch) == true">true</FlaneurUseHttp>
 	</PropertyGroup>
 
@@ -67,9 +74,19 @@
 		</Exec>
 
 		<ItemGroup>
+			<!-- Expand multi-value property into items -->
 			<_FlaneurBundleExpandedAsset Include="$(FlaneurBundleAssets)" />
-			<FlaneurBundleAsset Include="@(_FlaneurBundleExpandedAsset -> '$(FlaneurWorkingDirectory)/%(Identity)')">
-				<Link>$(FlaneurBundleDirectory)/$([MSBuild]::MakeRelative ('$(FlaneurWorkingDirectory)', '%(Identity)'))</Link>
+			<!-- Resolve paths based on working directory -->
+			<_FlaneurBundleResolvedAsset Include="@(_FlaneurBundleExpandedAsset -> '$(FlaneurWorkingDirectory)/%(Identity)')" />
+		</ItemGroup>
+		
+		<DeepestCommonDirectoryTask Items="@(_FlaneurBundleResolvedAsset)">
+			<Output TaskParameter="Directory" PropertyName="_FlaneurBundleCommonDirectory" />
+		</DeepestCommonDirectoryTask>
+		
+		<ItemGroup>
+			<FlaneurBundleAsset Include="@(_FlaneurBundleResolvedAsset)">
+				<Link>$([System.IO.Path]::Combine($(FlaneurBundleDirectory), $([MSBuild]::MakeRelative('$(_FlaneurBundleCommonDirectory)', '%(Identity)'))))</Link>
 			</FlaneurBundleAsset>
 		</ItemGroup>
 
@@ -100,7 +117,7 @@
 
 		<PropertyGroup>
 			<FlaneurHttpUrl Condition="'$(FlaneurHttpUrl)' == ''">http://localhost</FlaneurHttpUrl>
-			<FlaneurBundleUrl Condition="'$(FlaneurBundleUrl)' == ''">bundle://$(FlaneurBundleDirectory)</FlaneurBundleUrl>
+			<FlaneurBundleUrl Condition="'$(FlaneurBundleUrl)' == ''">flaneur://bundle/$(FlaneurBundleDirectory)</FlaneurBundleUrl>
 			<FlaneurUrl Condition="'$(FlaneurUseHttp)' == 'true'">$(FlaneurHttpUrl)</FlaneurUrl>
 			<FlaneurUrl Condition="'$(FlaneurUseHttp)' != 'true'">$(FlaneurBundleUrl)</FlaneurUrl>
 		</PropertyGroup>
