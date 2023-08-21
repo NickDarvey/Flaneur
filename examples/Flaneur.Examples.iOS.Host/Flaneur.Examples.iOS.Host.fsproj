@@ -15,6 +15,7 @@
 
 	<PropertyGroup>
 		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
+		<FlaneurRestoreCommand>npm install</FlaneurRestoreCommand>
 		<FlaneurHttpUrlCommand>npm run -s print:start-url</FlaneurHttpUrlCommand>
 		<FlaneurHttpCommand>npm run start</FlaneurHttpCommand>
 		<FlaneurBundleAssetsCommand>npm run -s print:build-assets</FlaneurBundleAssetsCommand>

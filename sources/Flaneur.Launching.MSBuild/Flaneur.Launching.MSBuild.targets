@@ -44,7 +44,6 @@
 		<FlaneurUseHttp Condition="$(FlaneurUseHttp) != false and $(_IsHttpLaunch) == true">true</FlaneurUseHttp>
 	</PropertyGroup>
 
-
 	<!--
 		Allow specifying bundle assets in project.
 			
@@ -116,11 +115,11 @@
 		</Exec>
 
 		<PropertyGroup>
-			<FlaneurHttpUrl Condition="'$(FlaneurHttpUrl)' == ''">http://localhost</FlaneurHttpUrl>
+			<FlaneurHttpUrl Condition="$(FlaneurHttpUrl) == ''">http://localhost</FlaneurHttpUrl>
 			<FlaneurBundleUrl Condition="$(FlaneurBundleUrl) == '' and $(FlaneurBundleDirectory) == ''">bundle://main</FlaneurBundleUrl>
 			<FlaneurBundleUrl Condition="$(FlaneurBundleUrl) == '' and $(FlaneurBundleDirectory) != ''">bundle://main/$(FlaneurBundleDirectory)</FlaneurBundleUrl>
-			<FlaneurUrl Condition="'$(FlaneurUseHttp)' == 'true'">$(FlaneurHttpUrl)</FlaneurUrl>
-			<FlaneurUrl Condition="'$(FlaneurUseHttp)' != 'true'">$(FlaneurBundleUrl)</FlaneurUrl>
+			<FlaneurUrl Condition="$(FlaneurUrl) == '' and $(FlaneurUseHttp) == 'true'">$(FlaneurHttpUrl)</FlaneurUrl>
+			<FlaneurUrl Condition="$(FlaneurUrl) == '' and $(FlaneurUseHttp) != 'true'">$(FlaneurBundleUrl)</FlaneurUrl>
 		</PropertyGroup>
 		<Message Importance="high" Text="Flaneur will use the URL '$(FlaneurUrl)'" />
 
@@ -142,6 +141,16 @@
 			Text="Flaneur is running bundle command '$(FlaneurBundleCommand)'" />
 		<Exec
 			Command="$(FlaneurBundleCommand)"
+			WorkingDirectory="$(FlaneurWorkingDirectory)" />
+
+	</Target>
+
+	<Target Name="RunFlaneurRestore" Condition="'$(FlaneurUseHttp)' != 'true' and '$(FlaneurRestoreCommand)' != ''" BeforeTargets="CollectPackageReferences">
+		<Message
+			Importance="high"
+			Text="Flaneur is running restore command '$(FlaneurRestoreCommand)'" />
+		<Exec
+			Command="$(FlaneurRestoreCommand)"
 			WorkingDirectory="$(FlaneurWorkingDirectory)" />
 
 	</Target>
