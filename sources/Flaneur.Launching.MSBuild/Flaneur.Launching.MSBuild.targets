@@ -124,7 +124,7 @@
 		</PropertyGroup>
 		<Message Importance="high" Text="Flaneur will use the URL '$(FlaneurUrl)'" />
 
-		<SetEnvTask Condition="'$(FlaneurUrl)' != ''" Variable="FLANEUR_LAUNCH_URL" Value="$(FlaneurUrl)" />
+		<SetEnvTask Condition="'$(FlaneurUrl)' != ''" Variable="FLANEUR_URL" Value="$(FlaneurUrl)" />
 	</Target>
 
 	<Target Name="RunLaunchHttp" Condition="'$(FlaneurUseHttp)' == 'true' and '$(FlaneurHttpCommand)' != ''">

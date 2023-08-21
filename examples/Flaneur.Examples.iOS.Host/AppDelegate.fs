@@ -9,7 +9,7 @@ open FSharp.Data.LiteralProviders
 
 type Animal = { Name: string; Age: int }
 
-type private LaunchUrl = Env<"FLANEUR_LAUNCH_URL">
+type private LaunchUrl = Env<"FLANEUR_URL">
 
 [<Register(nameof AppDelegate)>]
 type AppDelegate() =

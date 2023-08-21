@@ -9,13 +9,13 @@ You can configure how the host launches your wapp by setting the _Flaneur launch
 
 For example, you can use a hot reload server while you're developing but use optimized bundled assets for a production release.
 
-You can set the variable through the environment variable `FLANEUR_LAUNCH_URL`. The default value is `bundle://`.
+You can set the variable through the environment variable `FLANEUR_URL`. The default value is `bundle://main`.
 
 **CLI**
 
 ```
 # TODO: start your wapp hot reload server, then
-export FLANEUR_LAUNCH_URL=http://localhost:8080
+export FLANEUR_URL=http://localhost:8080
 dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID
 ```
 
@@ -28,7 +28,7 @@ dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID
     "build:host": "dotnet publish -f net7.0-ios -r ios-arm64 -c Release",
     "build": "npm-run-all build:wapp build:host",
     "start:wapp": "echo start your wapp hot reload server"
-    "start:host": "cross-env FLANEUR_LAUNCH_URL=http://localhost:8080 dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID",
+    "start:host": "cross-env FLANEUR_URL=http://localhost:8080 dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID",
     "start": "npm-run-all --parallel start:*"
   },
   "devDependencies": {
