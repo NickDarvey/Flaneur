@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="../Examples.Build.props" />
-	
+
 	<PropertyGroup>
 		<TargetFramework>net7.0-ios</TargetFramework>
 		<OutputType>Exe</OutputType>
@@ -11,12 +11,17 @@
 		<!-- App Identifier -->
 		<ApplicationId>works.brink.Flaneur.app</ApplicationId>
 		<ApplicationIdGuid>25f39401-8c74-4bc9-abeb-61c13bdb1fd7</ApplicationIdGuid>
+	</PropertyGroup>
 
-		<FlaneurLaunchUrlCommand>npm run -s print:start-url</FlaneurLaunchUrlCommand>
-		<FlaneurLaunchCommand>npm run start</FlaneurLaunchCommand>
+	<PropertyGroup>
 		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
+		<FlaneurRestoreCommand>npm install</FlaneurRestoreCommand>
+		<FlaneurHttpUrlCommand>npm run -s print:start-url</FlaneurHttpUrlCommand>
+		<FlaneurHttpCommand>npm run start</FlaneurHttpCommand>
+		<FlaneurBundleAssetsCommand>npm run -s print:build-assets</FlaneurBundleAssetsCommand>
+		<FlaneurBundleCommand>npm run build</FlaneurBundleCommand>
 
-
+		<FlaneurUseHttp>false</FlaneurUseHttp>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -44,10 +49,7 @@
 	</PropertyGroup>
 
 
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-	  <CreatePackage>false</CreatePackage>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-	  <CreatePackage>false</CreatePackage>
-	</PropertyGroup>
+	<ItemGroup>
+		<TrimmableAssembly Include="Fable.Core" Visible="false" />
+  </ItemGroup>
 </Project>

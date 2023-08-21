@@ -2,17 +2,44 @@
 
 ## Launching
 
-You can configure how the host launches your wapp by setting the _Flaneur launch URL_ variable.
+### TODO: Launching 
+1. Make the _Flanuer URL_ variable work out-of-the-box.
+
+   Create a new [source code-only](https://medium.com/@attilah/source-code-only-nuget-packages-8f34a8fb4738) project, Flaneur.Launching, that makes he_Flaneur URL_ variable available at build time via an environment variable.
+
+1. Rebuild the host project if a file in `FlaneurWorkingDirectory` has changed.
+
+   This might also be achieved by replacing the `FlaneurWorkingDirectory` with a Flaneur-tagged project reference (or a FlaneurReference?) so we can still find the right working directory and the default up-to-date-check of Visual Studio works.
+
+### Launching with an environment variable
+
+You can configure how the host launches your wapp at build time by setting a _Flaneur URL_ variable and using the [FSharp.Data.LiteralProviders](https://github.com/Tarmil/FSharp.Data.LiteralProviders) package.
+
+**AppDelegate.fs**
+
+```fsharp
+type private LaunchUrl = Env<"FLANEUR_URL", "bundle://main">
+
+[<Register(nameof AppDelegate)>]
+type AppDelegate() =
+    inherit UIApplicationDelegate()
+       
+    override val Window = null with get, set
+
+    override this.FinishedLaunching(application: UIApplication, launchOptions: NSDictionary) =
+        this.Window <- new UIWindow(UIScreen.MainScreen.Bounds)
+        this.Window.RootViewController <- new WebAppViewController (new NSUrl(LaunchUrl.Value), handler)
+        this.Window.MakeKeyAndVisible()
+        true
+```
 
 For example, you can use a hot reload server while you're developing but use optimized bundled assets for a production release.
-
-You can set the variable through the environment variable `FLANEUR_LAUNCH_URL`. The default value is `bundle://`.
 
 **CLI**
 
 ```
 # TODO: start your wapp hot reload server, then
-export FLANEUR_LAUNCH_URL=http://localhost:8080
+export FLANEUR_URL=http://localhost:8080
 dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID
 ```
 
@@ -25,7 +52,7 @@ dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID
     "build:host": "dotnet publish -f net7.0-ios -r ios-arm64 -c Release",
     "build": "npm-run-all build:wapp build:host",
     "start:wapp": "echo start your wapp hot reload server"
-    "start:host": "cross-env FLANEUR_LAUNCH_URL=http://localhost:8080 dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID",
+    "start:host": "cross-env FLANEUR_URL=http://localhost:8080 dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID",
     "start": "npm-run-all --parallel start:*"
   },
   "devDependencies": {
@@ -39,19 +66,29 @@ dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID
 
 ### Launching with Flaneur.Launching.MSBuild
 
-If you have the `Flaneur.Launching.MSBuild` package installed, you can also set the variable using the MSBuild property `FlaneurLaunchUrl` or you can calculate the value through a command using the MSBuild property `FlaneurLaunchUrlCommand`.
+If you have the `Flaneur.Launching.MSBuild` package installed, you can set the `FLANEUR_URL` environment variable using the MSBuild property `FlaneurUrl`.
 
 **CLI**
 
 ```
-dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID` -p:FlaneurLaunchUrl=http://localhost:8080
+dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID` -p:FlaneurUrl=http://localhost:8080
 ```
+
+You can also specify the behaviours for how Flaneur launches with _HTTP_ and _bundle_ so your wapp is built or started when you build or run the host in Visual Studio or via the dotnet CLI.
+
+You can control whether your wapp is launched via _HTTP_ or _bundle_ with the property `FlaneurUseHttp`.
 
 **fsproj and package.json**
 
 ```xml
 <PropertyGroup>
-  <FlaneurLaunchUrlCommand>npm run -s print:start-url</FlaneurLaunchUrlCommand>
+    <FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
+    <FlaneurHttpUrlCommand>npm run -s print:start-url</FlaneurHttpUrlCommand>
+    <FlaneurHttpCommand>npm run start</FlaneurHttpCommand>
+    <FlaneurBundleAssetsCommand>npm run -s print:build-assets</FlaneurBundleAssetsCommand>
+    <FlaneurBundleCommand>npm run build</FlaneurBundleCommand>
+
+    <FlaneurUseHttp>false</FlaneurUseHttp>
 </PropertyGroup>
 ```
 
@@ -59,10 +96,16 @@ dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID` -p:F
 {
   "private": true,
   "scripts": {
-    "print:start-url": "node --print \"require('running-at')(8080).network\""
+    "print:start-url": "node --print \"require('running-at')(5173).network\"",
+    "print:build-assets": "glob --nodir \"dist/**/*\"",
+    "install": "dotnet tool restore",
+    "build": "dotnet fable . -o bin/wwwroot --run vite build --outDir dist --emptyOutDir",
+    "start": "dotnet fable watch . -s -o bin/wwwroot --run vite dev --host 0.0.0.0 --port 5173 --strictPort"
   },
   "devDependencies": {
-    "running-at": "0.3.22"
+    "glob": "10.3.3",
+    "running-at": "0.3.22",
+    "vite": "4.4.2"
   }
 }
 ```
@@ -75,7 +118,7 @@ dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID` -p:F
 
 Code generation for Flaneur.
 
-**TODO**:
+### TODO: Remoting
 
 1. Reintegrate generators in example projects
 	1. Add generator to `Flanuer.Examples.iOS.App.fsproj`.

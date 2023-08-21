@@ -3,4 +3,5 @@
 	<PropertyGroup>
 		<FlaneurAssemblyPath>$(MSBuildThisFileDirectory)/bin/$(Configuration)/netstandard2.0/Flaneur.Launching.MSBuild.dll</FlaneurAssemblyPath>
 	</PropertyGroup>
+
 </Project>
