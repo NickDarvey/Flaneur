@@ -9,7 +9,7 @@ let MyApp() =
     let _ = LitElement.init(fun cfg ->
         cfg.useShadowDom <- false
     )
-    let fooProxy = FooProxy "flaneur://app"
+    let fooProxy = FooProxy "delegate://main"
 
     let runFoo () =
       let obs = fooProxy.Foo ()

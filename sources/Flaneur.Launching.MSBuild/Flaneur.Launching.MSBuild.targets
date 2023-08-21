@@ -117,7 +117,8 @@
 
 		<PropertyGroup>
 			<FlaneurHttpUrl Condition="'$(FlaneurHttpUrl)' == ''">http://localhost</FlaneurHttpUrl>
-			<FlaneurBundleUrl Condition="'$(FlaneurBundleUrl)' == ''">flaneur://bundle/$(FlaneurBundleDirectory)</FlaneurBundleUrl>
+			<FlaneurBundleUrl Condition="$(FlaneurBundleUrl) == '' and $(FlaneurBundleDirectory) == ''">bundle://main</FlaneurBundleUrl>
+			<FlaneurBundleUrl Condition="$(FlaneurBundleUrl) == '' and $(FlaneurBundleDirectory) != ''">bundle://main/$(FlaneurBundleDirectory)</FlaneurBundleUrl>
 			<FlaneurUrl Condition="'$(FlaneurUseHttp)' == 'true'">$(FlaneurHttpUrl)</FlaneurUrl>
 			<FlaneurUrl Condition="'$(FlaneurUseHttp)' != 'true'">$(FlaneurBundleUrl)</FlaneurUrl>
 		</PropertyGroup>
