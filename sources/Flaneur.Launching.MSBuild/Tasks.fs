@@ -58,17 +58,25 @@ type LaunchTask() =
 type DeepestCommonDirectoryTask() =
   inherit Task()
   
-  // https://stackoverflow.com/a/24867012/1259408
-  let getLongestCommonPrefix (s : string[]) : string =
-    if Array.isEmpty s then "" else 
-    let mutable k = s.[0].Length
-    for i = 1 to s.Length - 1 do
-        k <- min k s.[i].Length
-        for j = 0 to k - 1 do
-            if s.[i].[j] <> s.[0].[j]
-            then k <- j
-            else ()
-    s.[0].[0..k-1]
+  let getLongestCommonPrefix (strings : string[]) : string =
+    if Array.isEmpty strings then "" else
+
+    let rec charsf stringi chari charmax =
+      if chari = charmax then chari
+      elif strings.[0].[chari] = strings.[stringi].[chari]
+      then charsf stringi (chari + 1) charmax
+      else chari
+
+    let rec stringsf stringi chari stringmax =
+      if stringi = stringmax then chari else
+      let chari = min chari strings.[stringi].Length
+      let chari = charsf stringi 0 chari
+      stringsf (stringi + 1) chari stringmax
+
+    let i = strings.[0].Length
+    let i = stringsf 1 i strings.Length
+
+    strings.[0].[0..i-1]
 
   [<Required>]
   member val Items = Array.empty<ITaskItem> with get, set
@@ -77,15 +85,10 @@ type DeepestCommonDirectoryTask() =
   member val Directory = null with get, set
 
   override this.Execute() =
-    let prefix =
-      this.Items
-      |> Array.map (fun i -> i.GetMetadata "FullPath")
-      |> getLongestCommonPrefix
-
+    let items = this.Items |> Array.map (fun i -> i.GetMetadata "FullPath")
+    let prefix = getLongestCommonPrefix items
     let last = prefix.LastIndexOf System.IO.Path.DirectorySeparatorChar
-
     this.Directory <- if last < 0 then "" else prefix.Substring(0, last)
-
     true
 
 
