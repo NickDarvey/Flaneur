@@ -7,40 +7,48 @@ open Flaneur.Remoting.IOS
 open Thoth.Json.Net
 open FSharp.Data.LiteralProviders
 
-type Animal = { Name: string; Age: int }
+type Animal = { Name : string ; Age : int }
 
 type private LaunchUrl = Env<"FLANEUR_URL">
 
 [<Register(nameof AppDelegate)>]
 type AppDelegate() =
-    inherit UIApplicationDelegate()
+  inherit UIApplicationDelegate()
 
-    let handler serviceName args =
-      match serviceName, args with
-      | "/foo", [||] ->
-        asyncSeq { yield {| Value=1 |} }
-        |> AsyncSeq.toObservable
-        |> Observable.map (Encode.Auto.generateEncoder () >> fun x -> x.ToString())
-      | "/fooWith", [|_; _|] -> 
-        asyncSeq {
-          yield { Name="Daisy"; Age=15 }
-          do! Async.Sleep 1000
-          yield { Name="Fluffle"; Age=9 }
-        }
-        |> AsyncSeq.toObservable
-        |> Observable.map (Encode.Auto.generateEncoder () >> fun x -> x.ToString())
-      | _ ->
-      invalidOp "unknown service"
-       
-    override val Window = null with get, set
+  let handler serviceName args =
+    match serviceName, args with
+    | "/foo", [||] ->
+      asyncSeq { yield {| Value = 1 |} }
+      |> AsyncSeq.toObservable
+      |> Observable.map (
+        Encode.Auto.generateEncoder () >> fun x -> x.ToString ()
+      )
+    | "/fooWith", [| _ ; _ |] ->
+      asyncSeq {
+        yield { Name = "Daisy" ; Age = 15 }
+        do! Async.Sleep 1000
+        yield { Name = "Fluffle" ; Age = 9 }
+      }
+      |> AsyncSeq.toObservable
+      |> Observable.map (
+        Encode.Auto.generateEncoder () >> fun x -> x.ToString ()
+      )
+    | _ -> invalidOp "unknown service"
 
-    override this.FinishedLaunching(application: UIApplication, launchOptions: NSDictionary) =
-        let url = new NSUrl(LaunchUrl.Value)
-        // create a new window instance based on the screen size
-        this.Window <- new UIWindow(UIScreen.MainScreen.Bounds)
+  override val Window = null with get, set
 
-        this.Window.RootViewController <- new WebAppViewController (url, handler)
+  override this.FinishedLaunching
+    (
+      application : UIApplication,
+      launchOptions : NSDictionary
+    )
+    =
+    let url = new NSUrl (LaunchUrl.Value)
+    // create a new window instance based on the screen size
+    this.Window <- new UIWindow (UIScreen.MainScreen.Bounds)
 
-        this.Window.MakeKeyAndVisible()
-        
-        true
+    this.Window.RootViewController <- new WebAppViewController (url, handler)
+
+    this.Window.MakeKeyAndVisible ()
+
+    true
