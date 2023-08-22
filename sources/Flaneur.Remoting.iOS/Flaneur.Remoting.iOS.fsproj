@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0-ios</TargetFramework>
+	<PropertyGroup>
+		<TargetFramework>net7.0-ios</TargetFramework>
 		<SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="Library.fs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="Library.fs" />
+	</ItemGroup>
 
 </Project>
