@@ -60,6 +60,7 @@ type DeepestCommonDirectoryTask() =
   
   // https://stackoverflow.com/a/24867012/1259408
   let getLongestCommonPrefix (s : string[]) : string =
+    if Array.isEmpty s then "" else 
     let mutable k = s.[0].Length
     for i = 1 to s.Length - 1 do
         k <- min k s.[i].Length
