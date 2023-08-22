@@ -85,7 +85,8 @@
 		
 		<ItemGroup>
 			<FlaneurBundleAsset Include="@(_FlaneurBundleResolvedAsset)">
-				<Link>$([System.IO.Path]::Combine($(FlaneurBundleDirectory), $([MSBuild]::MakeRelative('$(_FlaneurBundleCommonDirectory)', '%(Identity)'))))</Link>
+				<Link Condition="'$(_FlaneurBundleCommonDirectory)' != ''">$([System.IO.Path]::Combine($(FlaneurBundleDirectory), $([MSBuild]::MakeRelative('$(_FlaneurBundleCommonDirectory)', '%(Identity)'))))</Link>
+				<Link Condition="'$(_FlaneurBundleCommonDirectory)' == ''">$([System.IO.Path]::Combine($(FlaneurBundleDirectory), '%(Identity)'))</Link>
 			</FlaneurBundleAsset>
 		</ItemGroup>
 
