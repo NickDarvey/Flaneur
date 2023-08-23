@@ -21,10 +21,15 @@
 		<FlaneurBundleAssetsCommand>npm run -s print:build-assets</FlaneurBundleAssetsCommand>
 		<FlaneurBundleCommand>npm run build</FlaneurBundleCommand>
 
-		<FlaneurUseHttp>false</FlaneurUseHttp>
+		<FlaneurUseHttp>true</FlaneurUseHttp>
+
+		<CodesignKey>Apple Development: Nicholas Darvey (NP6ZUTWYTR)</CodesignKey>
+
+		<CodesignProvision>VS: works.brink.flaneur.app Development</CodesignProvision>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="Services.fs" />
 		<Compile Include="AppDelegate.fs" />
 		<Compile Include="SceneDelegate.fs" />
 		<Compile Include="Main.fs" />

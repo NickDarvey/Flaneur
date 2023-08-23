@@ -15,7 +15,7 @@ module private Request =
       Array.empty
     else
       let nameValues = System.Web.HttpUtility.ParseQueryString queryString
-      nameValues.AllKeys |> Array.map (fun key -> key, nameValues.Get key)
+      nameValues.AllKeys |> Array.map (fun key -> nameValues.Get key)
 
 
 module private Response =
@@ -75,6 +75,7 @@ type DelegateSchemeHandler(handler : Handler<_, _>) =
 
   interface IWKUrlSchemeHandler with
     member _.StartUrlSchemeTask (webView, task) =
+      System.Diagnostics.Debug.WriteLine $"Starting request {task.Request.Url.ToString ()}"
       // I think `DelegateSchemeHandler` gets created for each request...
       //assert isNull dispose
 
@@ -123,6 +124,7 @@ type DelegateSchemeHandler(handler : Handler<_, _>) =
       subscriptions.Add (task, subscription)
 
     member _.StopUrlSchemeTask (webView, task) =
+      System.Diagnostics.Debug.WriteLine $"Stopping request {task.Request.Url.ToString ()}"
       match subscriptions.TryGetValue task with
       | true, subscription -> subscription.Dispose ()
       | false, _ -> ()

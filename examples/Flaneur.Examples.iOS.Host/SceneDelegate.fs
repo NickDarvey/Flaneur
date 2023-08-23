@@ -1,4 +1,4 @@
-﻿namespace Flaneur.Examples.iOS
+﻿namespace Flaneur.Examples.iOS.Host
 
 open UIKit
 open Foundation

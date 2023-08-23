@@ -1,42 +1,40 @@
-﻿module Flaneur.Examples.iOS.Services
+﻿module Flaneur.Examples.iOS.App.Services
 
 open Flaneur.Remoting.Client
 
+// TODO: Move to shared library
 type Animal = { Name : string ; Age : int }
 
-type FooService =
-  abstract Foo : unit -> System.IObservable<{| Value : int |}>
-  abstract FooWith : string * int -> System.IObservable<Animal>
+// TODO: Move to shared library
+type ExampleService =
+  abstract foo : unit -> System.IObservable<{| Value : int |}>
+  abstract bar : string * int -> System.IObservable<Animal>
+  abstract baz : unit -> System.IObservable<Animal>
 
-let FooProxy serviceOrigin =
-  let decoder t str : Result<obj, string> =
-    let decoder =
-      Thoth.Json.Decode.Auto.generateBoxedDecoder t
-      |> Thoth.Json.Decode.unboxDecoder
-
-    Thoth.Json.Decode.fromString decoder str
-
-  let stringEncoder x = $"{x}"
-
-  let inline decode typ str =
-    match decoder typ str with
-    | Ok result -> unbox result
-    | Error e -> failwith $"Oops"
-
-  { new FooService with
-      member _.FooWith (a0 : string, a1 : int) =
-        Handler.create
-          serviceOrigin
-          stringEncoder
-          (decode typeof<Animal>)
-          "fooWith"
-          [ a0 ; a1.ToString () ]
-
-      member _.Foo () =
-        Handler.create
-          serviceOrigin
-          stringEncoder
-          (decode typeof<{| Value : int |}>)
+/// Creates a handler for the example service.
+/// (This would be codegened in future.)
+let createExampleServiceProxy (encodeArg : Encoder2<string>) (decodeResult : Decoder2<string>) origin =
+  { new ExampleService with
+      member _.foo () =
+        Handler.create2
+          origin
           "foo"
-          []
+          [ ]
+        |> Observable.map (unbox <| decodeResult typeof<{| Value : int |}>)
+
+      member _.bar (a0 : string, a1 : int) =
+        Handler.create2
+          origin
+          "bar"
+          [ encodeArg typeof<string> a0 ; encodeArg typeof<int> a1 ]
+        |> Observable.map (unbox <| decodeResult typeof<Animal>)
+
+      member _.baz () =
+        Handler.create2
+          origin
+          "baz"
+          [ ]
+        |> Observable.map (unbox <| decodeResult typeof<Animal>)
+        
   }
+  
