@@ -13,8 +13,8 @@ type ExampleService =
 
 /// Creates a handler for the example service.
 /// (This would be codegened in future.)
-let createExampleServiceProxy (encodeArg : Encoder<string>) (decodeResult : Decoder<string>) origin =
-  let invoke = HTTP.invokeWith origin
+let createExampleServiceProxy (encodeArg : Encoder<string>) (decodeResult : Decoder<string>) =
+  let invoke = HTTP.create ()
   { new ExampleService with
       member _.foo () =
         invoke "foo" [ ]

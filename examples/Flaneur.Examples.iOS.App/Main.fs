@@ -14,7 +14,7 @@ let private decodeResult t str =
 let private encodeArg _ arg =
   string arg
 
-let proxy = Services.createExampleServiceProxy encodeArg decodeResult "delegate://main"
+let proxy = Services.createExampleServiceProxy encodeArg decodeResult
 
 [<LitElement("my-app")>]
 let MyApp () =

@@ -13,15 +13,15 @@ module HTTP =
   open FSharp.Control
   open Fetch
 
-  /// Creates an HTTP method invocation proxy for a given origin.
-  let invokeWith origin =
+  /// Creates an HTTP method invocation proxy.
+  let create () =
     // Hosts like iOS need some help distinguishing unique requests.
     let mutable invocation = 0UL
     fun service args ->
       invocation <- invocation + 1UL
 
       let url =
-        let path = $"%s{origin}/%s{service}"
+        let path = $"delegate://main/%s{service}"
         let query =
           args
           |> List.map System.Uri.EscapeDataString
