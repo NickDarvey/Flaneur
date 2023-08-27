@@ -11,6 +11,9 @@
 
    This might also be achieved by replacing the `FlaneurWorkingDirectory` with a Flaneur-tagged project reference (or a FlaneurReference?) so we can still find the right working directory and the default up-to-date-check of Visual Studio works.
 
+1. Detect if the HTTP url (`FlaneurHttpUrlCommand`, `FlaneurHttpUrl`) is active and if so, don't run `FlaneurHttpCommand`.
+
+
 ### Launching with an environment variable
 
 You can configure how the host launches your wapp at build time by setting a _Flaneur URL_ variable and using the [FSharp.Data.LiteralProviders](https://github.com/Tarmil/FSharp.Data.LiteralProviders) package.

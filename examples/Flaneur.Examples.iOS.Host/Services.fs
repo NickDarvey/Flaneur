@@ -4,15 +4,15 @@ open FSharp.Control
 open System.Diagnostics
 
 // TODO: Share via Flaneur lib?
-type Encoder2<'Encoded> = System.Type -> obj -> 'Encoded
-type Decoder2<'Encoded> = System.Type -> 'Encoded -> obj
+type Encoder<'Encoded> = System.Type -> obj -> 'Encoded
+type Decoder<'Encoded> = System.Type -> 'Encoded -> obj
 
 // TODO: Move to shared library
 type Animal = { Name : string ; Age : int }
 
 /// Creates a handler for the example service.
 /// (This would be codegened in future.)
-let createExampleServiceHandler (encodeResult : Encoder2<string>) (decodeArg : Decoder2<string>) name args =
+let createExampleServiceHandler (encodeResult : Encoder<string>) (decodeArg : Decoder<string>) name args =
   let teeLogResult name msg =
     Debug.WriteLine $"%s{name} result: %s{msg}"
     msg

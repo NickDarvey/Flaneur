@@ -14,6 +14,8 @@ let private decodeResult t str =
 let private encodeArg _ arg =
   string arg
 
+let proxy = Services.createExampleServiceProxy encodeArg decodeResult "delegate://main"
+
 [<LitElement("my-app")>]
 let MyApp () =
   let _ = LitElement.init (fun cfg -> cfg.useShadowDom <- false)
@@ -23,7 +25,6 @@ let MyApp () =
 
   Hook.useEffectOnce (fun () -> subscription)
 
-  let proxy = Services.createExampleServiceProxy encodeArg decodeResult "delegate://main"
   
   let inline run (f : 'a -> System.IObservable<'b>) arg () =
     let mutable logs = []

@@ -2,9 +2,8 @@
 
 open UIKit
 open Foundation
-open Flaneur.Remoting.IOS
+open Flaneur.Remoting.iOS
 open FSharp.Data.LiteralProviders
-open Thoth.Json.Net
 
 type private LaunchUrl = Env<"FLANEUR_URL">
 

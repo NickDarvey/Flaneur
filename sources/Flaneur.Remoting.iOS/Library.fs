@@ -1,4 +1,4 @@
-﻿namespace Flaneur.Remoting.IOS
+﻿namespace Flaneur.Remoting.iOS
 
 open Foundation
 open UIKit
@@ -9,14 +9,15 @@ open System.IO
 
 
 module private Request =
-
   let parameters queryString =
     if isNull queryString then
       Array.empty
     else
       let nameValues = System.Web.HttpUtility.ParseQueryString queryString
-      nameValues.AllKeys |> Array.map (fun key -> nameValues.Get key)
-
+      nameValues.AllKeys
+      // Remove remoting protocol-specific parameters.
+      |> Array.filter (fun key -> not <| key.StartsWith '$')
+      |> Array.map (fun key -> nameValues.Get key)
 
 module private Response =
 
@@ -75,11 +76,7 @@ type DelegateSchemeHandler(handler : Handler<_, _>) =
 
   interface IWKUrlSchemeHandler with
     member _.StartUrlSchemeTask (webView, task) =
-      System.Diagnostics.Debug.WriteLine $"Starting request {task.Request.Url.ToString ()}"
-      // I think `DelegateSchemeHandler` gets created for each request...
-      //assert isNull dispose
-
-      // nope, reused so we need conditionalweak probs
+      Debug.WriteLine $"Starting request {task.Request.Url.ToString ()}"
 
       if task.Request.Url.Host <> "main" then
         Response.error
@@ -113,6 +110,7 @@ type DelegateSchemeHandler(handler : Handler<_, _>) =
               member _.OnCompleted () = task.DidFinish ()
 
               member _.OnError error =
+                Debug.WriteLine $"Error occured in result stream, will return to caller. (type = {error.GetType().Name}; message = '{error.Message}')"
                 task.DidReceiveData (NSData.FromString error.Message)
                 task.DidFinish ()
 
@@ -121,13 +119,15 @@ type DelegateSchemeHandler(handler : Handler<_, _>) =
           }
         )
 
-      subscriptions.Add (task, subscription)
+      subscriptions.Add (task.Request, subscription)
 
     member _.StopUrlSchemeTask (webView, task) =
       System.Diagnostics.Debug.WriteLine $"Stopping request {task.Request.Url.ToString ()}"
-      match subscriptions.TryGetValue task with
-      | true, subscription -> subscription.Dispose ()
-      | false, _ -> ()
+      match subscriptions.TryGetValue task.Request with
+      | true, subscription ->
+        subscription.Dispose ()
+      | false, _ ->
+        ()
 
 type BundleSchemeHandler() =
   inherit NSObject()

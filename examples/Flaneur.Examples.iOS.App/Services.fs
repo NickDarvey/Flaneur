@@ -1,6 +1,6 @@
 ﻿module Flaneur.Examples.iOS.App.Services
 
-open Flaneur.Remoting.Client
+open Flaneur.Remoting.Proxies
 
 // TODO: Move to shared library
 type Animal = { Name : string ; Age : int }
@@ -13,27 +13,20 @@ type ExampleService =
 
 /// Creates a handler for the example service.
 /// (This would be codegened in future.)
-let createExampleServiceProxy (encodeArg : Encoder2<string>) (decodeResult : Decoder2<string>) origin =
+let createExampleServiceProxy (encodeArg : Encoder<string>) (decodeResult : Decoder<string>) origin =
+  let invoke = HTTP.invokeWith origin
   { new ExampleService with
       member _.foo () =
-        Handler.create2
-          origin
-          "foo"
-          [ ]
+        invoke "foo" [ ]
         |> Observable.map (unbox <| decodeResult typeof<{| Value : int |}>)
 
       member _.bar (a0 : string, a1 : int) =
-        Handler.create2
-          origin
-          "bar"
-          [ encodeArg typeof<string> a0 ; encodeArg typeof<int> a1 ]
+        let args = [ encodeArg typeof<string> a0 ; encodeArg typeof<int> a1 ]
+        invoke "bar" args
         |> Observable.map (unbox <| decodeResult typeof<Animal>)
 
       member _.baz () =
-        Handler.create2
-          origin
-          "baz"
-          [ ]
+        invoke "baz" [ ]
         |> Observable.map (unbox <| decodeResult typeof<Animal>)
         
   }
