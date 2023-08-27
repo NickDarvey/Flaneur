@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
+		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.Wapp</FlaneurWorkingDirectory>
 		<FlaneurRestoreCommand>npm install</FlaneurRestoreCommand>
 		<FlaneurHttpUrlCommand>npm run -s print:start-url</FlaneurHttpUrlCommand>
 		<FlaneurHttpCommand>npm run start</FlaneurHttpCommand>
@@ -40,18 +40,21 @@
 		<PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1" />
 		<PackageReference Include="Thoth.Json.Net" Version="11.0.0" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="../../sources/Flaneur.Remoting.iOS/Flaneur.Remoting.iOS.fsproj" />
-  </ItemGroup>
 	
 	<PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
 		<CodesignProvision Condition="'$(CodesignProvision)'==''">VS: works.brink.flaneur.app Development</CodesignProvision>
+		<CodesignKey>Apple Development: Nicholas Darvey (NP6ZUTWYTR)</CodesignKey>
+		<CodesignProvision>VS: works.brink.flaneur.app Development</CodesignProvision>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
 		<CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\sources\Flaneur.Host.iOS\Flaneur.Host.iOS.fsproj" />
+	  <ProjectReference Include="..\..\sources\Flaneur.Remoting.Host.iOS\Flaneur.Remoting.Host.iOS.fsproj" />
+	</ItemGroup>
 
 
 	<ItemGroup>

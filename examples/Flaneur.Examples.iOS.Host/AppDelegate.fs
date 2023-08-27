@@ -2,8 +2,10 @@
 
 open UIKit
 open Foundation
-open Flaneur.Remoting.iOS
 open FSharp.Data.LiteralProviders
+
+open Flaneur
+open Flaneur.Remoting
 
 type private LaunchUrl = Env<"FLANEUR_URL">
 
@@ -35,7 +37,7 @@ type AppDelegate() =
     let handler = Services.createExampleServiceHandler encodeResult decodeArg
 
     this.Window <- new UIWindow (UIScreen.MainScreen.Bounds)
-    this.Window.RootViewController <- new WebAppViewController (url, handler)
+    this.Window.RootViewController <- new WappViewController (url, WappViewController.configureWith handler)
     this.Window.MakeKeyAndVisible ()
 
     true

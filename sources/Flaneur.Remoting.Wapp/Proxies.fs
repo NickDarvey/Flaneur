@@ -21,7 +21,7 @@ module HTTP =
       invocation <- invocation + 1UL
 
       let url =
-        let path = $"delegate://main/%s{service}"
+        let path = $"remoting://main/%s{service}"
         let query =
           args
           |> List.map System.Uri.EscapeDataString
@@ -60,3 +60,6 @@ module HTTP =
       }
 
       AsyncSeq.toObservable sequence
+
+// TODO select correct proxy implementation based on platform.
+// (A Flaneur.Wapp lib might need to help us by making env variables like this available.)

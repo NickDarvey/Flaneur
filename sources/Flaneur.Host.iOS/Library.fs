@@ -1,23 +1,11 @@
-﻿namespace Flaneur.Remoting.iOS
+﻿namespace Flaneur
+
+open System.Diagnostics
+open System.IO
 
 open Foundation
 open UIKit
 open WebKit
-open System
-open System.Diagnostics
-open System.IO
-
-
-module private Request =
-  let parameters queryString =
-    if isNull queryString then
-      Array.empty
-    else
-      let nameValues = System.Web.HttpUtility.ParseQueryString queryString
-      nameValues.AllKeys
-      // Remove remoting protocol-specific parameters.
-      |> Array.filter (fun key -> not <| key.StartsWith '$')
-      |> Array.map (fun key -> nameValues.Get key)
 
 module private Response =
 
@@ -66,69 +54,6 @@ module private Response =
     urlSchemeTask.DidReceiveData data
     urlSchemeTask.DidFinish ()
 
-type Handler<'Parameter, 'Result> =
-  string -> 'Parameter array -> IObservable<'Result>
-
-type DelegateSchemeHandler(handler : Handler<_, _>) =
-  inherit NSObject()
-
-  let subscriptions = System.Runtime.CompilerServices.ConditionalWeakTable ()
-
-  interface IWKUrlSchemeHandler with
-    member _.StartUrlSchemeTask (webView, task) =
-      Debug.WriteLine $"Starting request {task.Request.Url.ToString ()}"
-
-      if task.Request.Url.Host <> "main" then
-        Response.error
-          task
-          $"Delegate '{task.Request.Url.Host}' is not supported."
-      else
-
-      let headers =
-        Response.headers [
-          "Cache-Control", "no-cache, max-age=0, must-revalidate, no-store"
-          "Content-Type", "text/plain"
-          "Access-Control-Allow-Origin", "*"
-        ]
-
-      let response =
-        new NSHttpUrlResponse (
-          task.Request.Url,
-          nativeint 200,
-          "HTTP/1.1",
-          headers
-        )
-
-      task.DidReceiveResponse response
-
-      let parameters = Request.parameters task.Request.Url.Query
-      let result = handler task.Request.Url.Path parameters
-
-      let subscription =
-        result.Subscribe (
-          { new IObserver<string> with
-              member _.OnCompleted () = task.DidFinish ()
-
-              member _.OnError error =
-                Debug.WriteLine $"Error occured in result stream, will return to caller. (type = {error.GetType().Name}; message = '{error.Message}')"
-                task.DidReceiveData (NSData.FromString error.Message)
-                task.DidFinish ()
-
-              member _.OnNext value =
-                task.DidReceiveData (NSData.FromString value)
-          }
-        )
-
-      subscriptions.Add (task.Request, subscription)
-
-    member _.StopUrlSchemeTask (webView, task) =
-      System.Diagnostics.Debug.WriteLine $"Stopping request {task.Request.Url.ToString ()}"
-      match subscriptions.TryGetValue task.Request with
-      | true, subscription ->
-        subscription.Dispose ()
-      | false, _ ->
-        ()
-
 type BundleSchemeHandler() =
   inherit NSObject()
 
@@ -141,8 +66,7 @@ type BundleSchemeHandler() =
   interface IWKUrlSchemeHandler with
     member _.StartUrlSchemeTask (wv, task) =
       if task.Request.Url.Host <> "main" then
-        Response.error
-          task
+        invalidOp
           $"Bundle '{task.Request.Url.Host}' is not supported."
       else
 
@@ -194,17 +118,13 @@ type BundleSchemeHandler() =
 
     member _.StopUrlSchemeTask (webView, task) = ()
 
-type WebAppViewController(launchUrl : NSUrl, handler) =
+type WappViewController(launchUrl : NSUrl, configure) =
   inherit UIViewController()
 
   let cfg = new WKWebViewConfiguration ()
   do cfg.SetUrlSchemeHandler (new BundleSchemeHandler (), urlScheme = "bundle")
 
-  do
-    cfg.SetUrlSchemeHandler (
-      new DelegateSchemeHandler (handler),
-      urlScheme = "delegate"
-    )
+  do configure cfg
 
   let wv = new WKWebView (frame = CoreGraphics.CGRect.Null, configuration = cfg)
   do wv.Inspectable <- true
