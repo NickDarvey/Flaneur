@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0-ios</TargetFramework>
+		<SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="Library.fs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Flaneur.Remoting.Host\Flaneur.Remoting.Host.fsproj" />
+	</ItemGroup>
+
+</Project>

@@ -5,11 +5,15 @@
 ### TODO: Launching 
 1. Make the _Flanuer URL_ variable work out-of-the-box.
 
-   Create a new [source code-only](https://medium.com/@attilah/source-code-only-nuget-packages-8f34a8fb4738) project, Flaneur.Launching, that makes he_Flaneur URL_ variable available at build time via an environment variable.
+   Create a new [source code-only](https://medium.com/@attilah/source-code-only-nuget-packages-8f34a8fb4738) project, Flaneur.Launching, that makes the _Flaneur URL_ variable available at build time via an environment variable. (See also whatever `fable.core\4.0.0\contentFiles\any\netstandard2.0\RELEASE_NOTES.md` is doing to add itself, maybe it doesn't need to be a new project.)
+
 
 1. Rebuild the host project if a file in `FlaneurWorkingDirectory` has changed.
 
    This might also be achieved by replacing the `FlaneurWorkingDirectory` with a Flaneur-tagged project reference (or a FlaneurReference?) so we can still find the right working directory and the default up-to-date-check of Visual Studio works.
+
+1. Detect if the HTTP url (`FlaneurHttpUrlCommand`, `FlaneurHttpUrl`) is active and if so, don't run `FlaneurHttpCommand`.
+
 
 ### Launching with an environment variable
 

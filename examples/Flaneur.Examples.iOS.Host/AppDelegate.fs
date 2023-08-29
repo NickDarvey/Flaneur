@@ -1,13 +1,11 @@
-﻿namespace Flaneur.Examples.iOS
+﻿namespace Flaneur.Examples.iOS.Host
 
 open UIKit
 open Foundation
-open FSharp.Control
-open Flaneur.Remoting.IOS
-open Thoth.Json.Net
 open FSharp.Data.LiteralProviders
 
-type Animal = { Name : string ; Age : int }
+open Flaneur
+open Flaneur.Remoting
 
 type private LaunchUrl = Env<"FLANEUR_URL">
 
@@ -15,25 +13,17 @@ type private LaunchUrl = Env<"FLANEUR_URL">
 type AppDelegate() =
   inherit UIApplicationDelegate()
 
-  let handler serviceName args =
-    match serviceName, args with
-    | "/foo", [||] ->
-      asyncSeq { yield {| Value = 1 |} }
-      |> AsyncSeq.toObservable
-      |> Observable.map (
-        Encode.Auto.generateEncoder () >> fun x -> x.ToString ()
-      )
-    | "/fooWith", [| _ ; _ |] ->
-      asyncSeq {
-        yield { Name = "Daisy" ; Age = 15 }
-        do! Async.Sleep 1000
-        yield { Name = "Fluffle" ; Age = 9 }
-      }
-      |> AsyncSeq.toObservable
-      |> Observable.map (
-        Encode.Auto.generateEncoder () >> fun x -> x.ToString ()
-      )
-    | _ -> invalidOp "unknown service"
+  let encodeResult t (obj : obj) =
+    let encoder = Thoth.Json.Net.Encode.Auto.LowLevel.generateEncoderCached t
+    Thoth.Json.Net.Encode.toString 0 (encoder obj)
+
+  let decodeArg t arg =
+    match t with
+    | t when t = typeof<string> -> box arg
+    | t when t = typeof<int> -> box <| System.Int32.Parse arg
+    | t ->
+      invalidOp $"Unsupported argument type '{t.Name}'."
+
 
   override val Window = null with get, set
 
@@ -44,11 +34,10 @@ type AppDelegate() =
     )
     =
     let url = new NSUrl (LaunchUrl.Value)
-    // create a new window instance based on the screen size
+    let handler = Services.createExampleServiceHandler encodeResult decodeArg
+
     this.Window <- new UIWindow (UIScreen.MainScreen.Bounds)
-
-    this.Window.RootViewController <- new WebAppViewController (url, handler)
-
+    this.Window.RootViewController <- new WappViewController (url, WappViewController.configureWith handler)
     this.Window.MakeKeyAndVisible ()
 
     true
