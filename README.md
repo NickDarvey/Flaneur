@@ -151,3 +151,7 @@ Code generation for Flaneur.
 		 [Publish: PrivateAssets=All not honored on ProjectReference items](https://github.com/dotnet/sdk/issues/952)
 
 1. Implement all the things. (Proxy generator, handler generator, etc.)
+
+   - Consider some values which could be opaque to the wapp. For example, a host might return a record which needs to be sent to a different endpoint. The wapp doesn't need to decode it, so the type doesn't need to be turned into a contract, but it does need to be able to pass it along. This could be marked in the interface by an single case DU, `type SomeRecord = SomeRecord`.
+
+     Code generation will need to have a facility for the wapp to and the host to avoid automatically decoding of this DU (because it won't actually be this DU, it will be the record) and (1) for the wapp, just pass around the opaque record and (2) for the host, explicilty decode it into the known record.
