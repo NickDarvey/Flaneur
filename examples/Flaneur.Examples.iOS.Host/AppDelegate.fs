@@ -9,20 +9,20 @@ open Flaneur.Remoting
 
 type private LaunchUrl = Env<"FLANEUR_URL">
 
-module Codec =
+module private Codec =
   module Result =
     let encode t (obj : obj) =
       let encoder = Thoth.Json.Net.Encode.Auto.LowLevel.generateEncoderCached t
       Thoth.Json.Net.Encode.toString 0 (encoder obj)
 
   module Arg =
-    let decode t arg =
-      match t with
-      | t when t = typeof<string> -> box arg
-      | t when t = typeof<int> -> box <| System.Int32.Parse arg
-      | t ->
-        invalidOp $"Unsupported argument type '{t.Name}'."
+    let decode t str =
+      let decoder = Thoth.Json.Net.Decode.Auto.LowLevel.generateDecoderCached t
 
+      match Thoth.Json.Net.Decode.fromString decoder str with
+      | Ok result -> result
+      | Error e ->
+        raise <| exn $"Failed to decode response. {e}"
 
 [<Register(nameof AppDelegate)>]
 type AppDelegate() =

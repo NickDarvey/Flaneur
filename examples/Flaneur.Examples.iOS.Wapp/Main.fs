@@ -3,18 +3,22 @@ module Flaneur.Examples.iOS.App.Main
 open Lit
 open Fable.Core.JS
 
-let private decodeResult t str =
-  let decoder = Thoth.Json.Decode.Auto.generateBoxedDecoderCached t
+module private Codec =
+  module Result =
+    let decode t str =
+      let decoder = Thoth.Json.Decode.Auto.generateBoxedDecoderCached t
 
-  match Thoth.Json.Decode.fromString decoder str with
-  | Ok result -> result
-  | Error e ->
-    raise <| exn $"Failed to decode response. {e}"
+      match Thoth.Json.Decode.fromString decoder str with
+      | Ok result -> result
+      | Error e ->
+        raise <| exn $"Failed to decode response. {e}"
 
-let private encodeArg _ arg =
-  string arg
+  module Arg =
+    let encode t (obj : obj) =
+      let encoder = Thoth.Json.Encode.Auto.generateBoxedEncoderCached t
+      Thoth.Json.Encode.toString 0 (encoder obj)
 
-let proxy = Services.createExampleServiceProxy encodeArg decodeResult
+let proxy = Services.createExampleServiceProxy Codec.Arg.encode Codec.Result.decode
 
 [<LitElement("my-app")>]
 let MyApp () =
