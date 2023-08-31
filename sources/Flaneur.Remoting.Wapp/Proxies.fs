@@ -5,9 +5,6 @@ open System.Diagnostics
 open Fable.Streams
 open Fable.Encoding
 
-type Encoder<'Encoded> = System.Type -> obj -> 'Encoded
-type Decoder<'Encoded> = System.Type -> 'Encoded -> obj
-
 module HTTP =
   open Fable.Core
   open FSharp.Control

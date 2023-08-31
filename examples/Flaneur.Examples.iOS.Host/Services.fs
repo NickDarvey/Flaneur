@@ -3,9 +3,7 @@
 open FSharp.Control
 open System.Diagnostics
 
-// TODO: Share via Flaneur lib?
-type Encoder<'Encoded> = System.Type -> obj -> 'Encoded
-type Decoder<'Encoded> = System.Type -> 'Encoded -> obj
+open Flaneur.Remoting
 
 // TODO: Move to shared library
 type Animal = { Name : string ; Age : int }
