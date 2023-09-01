@@ -63,7 +63,9 @@ type RemotingSchemeHandler(handler : Handler<_, _>) =
       let subscription =
         result.Subscribe (
           { new IObserver<string> with
-              member _.OnCompleted () = task.DidFinish ()
+              member _.OnCompleted () =
+                Debug.WriteLine $"Completed request {task.Request.Url.ToString ()}"
+                task.DidFinish ()
 
               member _.OnError error =
                 Debug.WriteLine $"Error occured in result stream, will return to caller. (type = {error.GetType().Name}; message = '{error.Message}')"
@@ -78,7 +80,7 @@ type RemotingSchemeHandler(handler : Handler<_, _>) =
       subscriptions.Add (task.Request, subscription)
 
     member _.StopUrlSchemeTask (webView, task) =
-      System.Diagnostics.Debug.WriteLine $"Stopping request {task.Request.Url.ToString ()}"
+      Debug.WriteLine $"Stopping request {task.Request.Url.ToString ()}"
       match subscriptions.TryGetValue task.Request with
       | true, subscription ->
         subscription.Dispose ()
