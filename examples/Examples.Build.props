@@ -27,9 +27,6 @@
 
 	<ItemGroup>
 		<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Launching.MSBuild" />
-		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="$(MSBuildThisFileDirectory)/../sources/Flaneur.Launching.MSBuild/Flaneur.Launching.MSBuild.fsproj">
-			<Private>false</Private>
-		</ProjectReference>
 		<!--<PackageReference Condition="'$(FlaneurTestWith)' == 'package'" Include="Flaneur.Remoting.MSBuild" />
 		<ProjectReference Condition="'$(FlaneurTestWith)' == 'project'" Include="$(MSBuildThisFileDirectory)/../sources/Flaneur.Remoting.MSBuild/Flaneur.Remoting.MSBuild.fsproj">
 			<Private>false</Private>

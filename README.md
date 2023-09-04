@@ -2,6 +2,10 @@
 
 ## Launching
 
+### Getting started
+
+Local development of Flaneur.Launching with example projects use a file reference instead of a package reference. You need to manually build a debug configuration of the Flaneur.Launching.MSBuild project before testing your changes with samples so the required assemblies are available.
+
 ### TODO: Launching 
 1. Make the _Flanuer URL_ variable work out-of-the-box.
 
