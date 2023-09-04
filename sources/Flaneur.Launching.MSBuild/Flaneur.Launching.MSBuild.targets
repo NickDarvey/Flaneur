@@ -102,10 +102,10 @@
 			<_FlaneurBundleExpandedFile Include="$(FlaneurBundleFiles)" />
 			 <!--Resolve paths based on working directory if necessary --> 
 			<_FlaneurBundleResolvedFile
-        Condition="$([System.IO.Path]::IsPathFullyQualified(%(RelativeDir))) == 'true'"
+        Condition="$(FlaneurBundleFiles) != '' and $([System.IO.Path]::IsPathFullyQualified(%(RelativeDir))) == 'true'"
         Include="@(_FlaneurBundleExpandedFile -> '%(Identity)')" />
       <_FlaneurBundleResolvedFile
-        Condition="$([System.IO.Path]::IsPathFullyQualified(%(RelativeDir))) == 'false'"
+        Condition="$(FlaneurBundleFiles) != '' and $([System.IO.Path]::IsPathFullyQualified(%(RelativeDir))) == 'false'"
         Include="@(_FlaneurBundleExpandedFile -> '$(FlaneurWorkingDirectory)/%(Identity)')" />
       <_FlaneurBundleResolvedFile
         Condition="'$(FlaneurBundleDirectory)' != '' and $([System.IO.Path]::IsPathFullyQualified($(FlaneurBundleDirectory))) == 'true'"
