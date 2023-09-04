@@ -6,20 +6,25 @@
 
 	<PropertyGroup>
 		<CollectBundleResourcesDependsOn>
-			$(CollectBundleResourcesDependsOn);
-			RunLaunchBundle;
-			IncludeBundleAssets
-		</CollectBundleResourcesDependsOn>
+      $(CollectBundleResourcesDependsOn);
+      _FlaneurBuildBundle;
+      _FlaneurIncludeBundle
+    </CollectBundleResourcesDependsOn>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<BuildDependsOn>
-			SetLaunchUrl;
+			_FlaneurSetUrl;
 			$(BuildDependsOn);
-			RunLaunchHttp
+			_FlaneurRunHttp
 		</BuildDependsOn>
 	</PropertyGroup>
 
+  <PropertyGroup>
+    <FlaneurWorkingDirectory>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(FlaneurWorkingDirectory)))</FlaneurWorkingDirectory>
+  </PropertyGroup>
+
+  <!-- Attempt to detect F5/debug run -->
 	<PropertyGroup>
 		<!--
 			Run via Visual Studio, IsImplicitlyTriggeredBuild is true
@@ -32,17 +37,20 @@
 			https://github.com/xamarin/xamarin-macios/blob/43ae6c749407e47fdf5fa07295119b87f7328ea6/dotnet/targets/Xamarin.Shared.Sdk.targets#L1860-L1925
 		-->
 		<_IsHttpLaunch Condition="'$(_IsHttpLaunch)' == '' and '$(_MlaunchWaitForExit)' != ''">true</_IsHttpLaunch>
-
-		<FlaneurWorkingDirectory>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(FlaneurWorkingDirectory)))</FlaneurWorkingDirectory>
-		<!--
-			TODO: Allow multiple subdirs for bundle.
-			Relative links don't seem to work in WKWebView with custom protocols so `bundle://example/wapp/index.html` that references `./assets/index.js`
-			will result in a request to `bundle://example/assets/index.js` instead of `bundle://example/wapp/assets/index.js`.
-		-->
-		<!--<FlaneurBundleDirectory>wapp</FlaneurBundleDirectory>-->
-
-		<FlaneurUseHttp Condition="$(FlaneurUseHttp) != false and $(_IsHttpLaunch) == true">true</FlaneurUseHttp>
 	</PropertyGroup>
+  
+  <Choose>
+    <When Condition="$(FlaneurMode) == 'HTTP' or $(FlaneurHttp) != '' or $(FlaneurMode) == '' and $(_IsHttpLaunch) == true and $(FlaneurBundle) == ''">
+      <PropertyGroup>
+        <FlaneurMode>HTTP</FlaneurMode>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FlaneurMode>Bundle</FlaneurMode>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
 
 	<!--
 		Allow specifying bundle assets in project.
@@ -57,60 +65,70 @@
 		https://stackoverflow.com/a/5188096/1259408
 	-->
 	<ItemGroup Condition="$(TargetFramework.Contains('-ios')) == true">
-		<BundleResource Include="@(FlaneurBundleAsset)" />
+		<BundleResource Include="@(FlaneurBundleFile)" />
 	</ItemGroup>
+ 
+  <Target Name="_FlaneurBuildBundle" Condition="$(FlaneurMode) == 'Bundle' and $(FlaneurBundleBuildCommand) != ''">
+    <Message
+      Importance="high"
+      Text="Flaneur is running bundle build command '$(FlaneurBundleBuildCommand)' in $(FlaneurWorkingDirectory)" />
+    <Exec
+      Command="$(FlaneurBundleBuildCommand)"
+			WorkingDirectory="$(FlaneurWorkingDirectory)" />
+  </Target>
+  
+  <Target Name="_FlaneurIncludeBundle" Condition="$(FlaneurMode) == 'Bundle'">
+		<!-- TODO: Allow bundle assets set from property FlaneurBundleFiles for CLI usage -->
 
-	<Target Name="IncludeBundleAssets" Condition="'$(FlaneurUseHttp)' != 'true'">
-		<!-- TODO: Allow bundle assets set from property FlaneurBundleAssets for CLI usage -->
 
 		<Exec
-			Condition="'$(FlaneurBundleAssetsCommand)' != ''"
-			Command="$(FlaneurBundleAssetsCommand)"
+			Condition="'$(FlaneurBundlePrintFilesCommand)' != ''"
+			Command="$(FlaneurBundlePrintFilesCommand)"
 			WorkingDirectory="$(FlaneurWorkingDirectory)"
 			EchoOff="true"
 			ConsoleToMSBuild="true">
-			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurBundleAssets" />
+			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurBundleFiles" />
 		</Exec>
 
 		<ItemGroup>
 			<!-- Expand multi-value property into items -->
-			<_FlaneurBundleExpandedAsset Include="$(FlaneurBundleAssets)" />
+			<_FlaneurBundleExpandedFile Include="$(FlaneurBundleFiles)" />
 			<!-- Resolve paths based on working directory -->
-			<_FlaneurBundleResolvedAsset Include="@(_FlaneurBundleExpandedAsset -> '$(FlaneurWorkingDirectory)/%(Identity)')" />
-			<_FlaneurBundleResolvedAsset Condition="'$(FlaneurBundleAssetsDirectory)' != ''" Include="$(FlaneurWorkingDirectory)/$(FlaneurBundleAssetsDirectory)/**/*" />
+			<_FlaneurBundleResolvedFile Include="@(_FlaneurBundleExpandedFile -> '$(FlaneurWorkingDirectory)/%(Identity)')" />
+			<_FlaneurBundleResolvedFile Condition="'$(FlaneurBundleDirectory)' != ''" Include="$(FlaneurWorkingDirectory)/$(FlaneurBundleDirectory)/**/*" />
 		</ItemGroup>
 
-		<DeepestCommonDirectoryTask Items="@(_FlaneurBundleResolvedAsset)">
+		<DeepestCommonDirectoryTask Items="@(_FlaneurBundleResolvedFile)">
 			<Output TaskParameter="Directory" PropertyName="_FlaneurBundleCommonDirectory" />
 		</DeepestCommonDirectoryTask>
 
 		<ItemGroup>
-			<FlaneurBundleAsset Include="@(_FlaneurBundleResolvedAsset)">
-				<Link Condition="'$(_FlaneurBundleCommonDirectory)' != ''">$([System.IO.Path]::Combine($(FlaneurBundleDirectory), $([MSBuild]::MakeRelative('$(_FlaneurBundleCommonDirectory)', '%(Identity)'))))</Link>
-				<Link Condition="'$(_FlaneurBundleCommonDirectory)' == ''">$([System.IO.Path]::Combine($(FlaneurBundleDirectory), '%(Identity)'))</Link>
-			</FlaneurBundleAsset>
+			<FlaneurBundleFile Include="@(_FlaneurBundleResolvedFile)">
+				<Link Condition="'$(_FlaneurBundleCommonDirectory)' != ''">$([MSBuild]::MakeRelative('$(_FlaneurBundleCommonDirectory)', '%(Identity)'))</Link>
+				<Link Condition="'$(_FlaneurBundleCommonDirectory)' == ''">%(Identity)</Link>
+			</FlaneurBundleFile>
 		</ItemGroup>
 
-		<Message Importance="high" Text="Flaneur is bundling @(FlaneurBundleAsset->Count()) assets" />
+		<Message Importance="high" Text="Flaneur is bundling @(FlaneurBundleFile->Count()) files" />
 
 		<ItemGroup Condition="$(TargetFramework.Contains('-ios')) == true">
-			<BundleResource Include="@(FlaneurBundleAsset)" KeepDuplicates="false" />
+			<BundleResource Include="@(FlaneurBundleFile)" KeepDuplicates="false" />
 		</ItemGroup>
 
 	</Target>
 
-	<Target Name="SetLaunchUrl">
+	<Target Name="_FlaneurSetUrl">
 		<Exec
-			Condition="'$(FlaneurHttpUrlCommand)' != '' and '$(FlaneurUseHttp)' == 'true'"
-			Command="$(FlaneurHttpUrlCommand)"
+			Condition="'$(FlaneurHttpPrintUrlCommand)' != '' and '$(FlaneurMode)' == 'HTTP'"
+			Command="$(FlaneurHttpPrintUrlCommand)"
 			WorkingDirectory="$(FlaneurWorkingDirectory)"
 			ConsoleToMSBuild="true">
 			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurHttpUrl" />
 		</Exec>
 
 		<Exec
-			Condition="'$(FlaneurBundleUrlCommand)' != '' and '$(FlaneurUseHttp)' != 'true'"
-			Command="$(FlaneurBundleUrlCommand)"
+			Condition="'$(FlaneurBundlePrintUrlCommand)' != '' and '$(FlaneurMode)' == 'Bundle'"
+			Command="$(FlaneurBundlePrintUrlCommand)"
 			WorkingDirectory="$(FlaneurWorkingDirectory)"
 			ConsoleToMSBuild="true">
 			<Output TaskParameter="ConsoleOutput" PropertyName="FlaneurBundleUrl" />
@@ -118,43 +136,22 @@
 
 		<PropertyGroup>
 			<FlaneurHttpUrl Condition="$(FlaneurHttpUrl) == ''">http://localhost</FlaneurHttpUrl>
-			<FlaneurBundleUrl Condition="$(FlaneurBundleUrl) == '' and $(FlaneurBundleDirectory) == ''">bundle://main</FlaneurBundleUrl>
-			<FlaneurBundleUrl Condition="$(FlaneurBundleUrl) == '' and $(FlaneurBundleDirectory) != ''">bundle://main/$(FlaneurBundleDirectory)</FlaneurBundleUrl>
-			<FlaneurUrl Condition="$(FlaneurUrl) == '' and $(FlaneurUseHttp) == 'true'">$(FlaneurHttpUrl)</FlaneurUrl>
-			<FlaneurUrl Condition="$(FlaneurUrl) == '' and $(FlaneurUseHttp) != 'true'">$(FlaneurBundleUrl)</FlaneurUrl>
+			<FlaneurBundleUrl Condition="$(FlaneurBundleUrl) == ''">bundle://main</FlaneurBundleUrl>
+			<FlaneurUrl Condition="$(FlaneurUrl) == '' and $(FlaneurMode) == 'HTTP'">$(FlaneurHttpUrl)</FlaneurUrl>
+			<FlaneurUrl Condition="$(FlaneurUrl) == '' and $(FlaneurMode) == 'Bundle'">$(FlaneurBundleUrl)</FlaneurUrl>
 		</PropertyGroup>
 		<Message Importance="high" Text="Flaneur will use the URL '$(FlaneurUrl)'" />
 
 		<SetEnvTask Condition="'$(FlaneurUrl)' != ''" Variable="FLANEUR_URL" Value="$(FlaneurUrl)" />
 	</Target>
 
-	<Target Name="RunLaunchHttp" Condition="'$(FlaneurUseHttp)' == 'true' and '$(FlaneurHttpCommand)' != ''">
+	<Target Name="_FlaneurRunHttp" Condition="'$(FlaneurMode)' == 'HTTP' and '$(FlaneurHttpRunCommand)' != ''">
 		<Message
 			Importance="high"
-			Text="Flaneur is running HTTP command '$(FlaneurHttpCommand)' in a new window" />
+			Text="Flaneur is running HTTP command '$(FlaneurHttpRunCommand)' in a new window" />
 		<LaunchTask
-			Command="$(FlaneurHttpCommand)"
+			Command="$(FlaneurHttpRunCommand)"
 			WorkingDirectory="$(FlaneurWorkingDirectory)" />
-	</Target>
-
-	<Target Name="RunLaunchBundle" Condition="'$(FlaneurUseHttp)' != 'true' and '$(FlaneurBundleCommand)' != ''">
-		<Message
-			Importance="high"
-			Text="Flaneur is running bundle command '$(FlaneurBundleCommand)' at $(FlaneurWorkingDirectory)" />
-		<Exec
-			Command="$(FlaneurBundleCommand)"
-			WorkingDirectory="$(FlaneurWorkingDirectory)" />
-
-	</Target>
-
-	<Target Name="RunFlaneurRestore" Condition="'$(FlaneurUseHttp)' != 'true' and '$(FlaneurRestoreCommand)' != ''" BeforeTargets="CollectPackageReferences">
-		<Message
-			Importance="high"
-			Text="Flaneur is running restore command '$(FlaneurRestoreCommand)'" />
-		<Exec
-			Command="$(FlaneurRestoreCommand)"
-			WorkingDirectory="$(FlaneurWorkingDirectory)" />
-
 	</Target>
 
 </Project>

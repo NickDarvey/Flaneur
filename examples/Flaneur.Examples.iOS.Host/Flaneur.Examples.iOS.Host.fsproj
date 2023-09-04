@@ -16,12 +16,12 @@
 	<PropertyGroup>
 		<FlaneurWorkingDirectory>../Flaneur.Examples.iOS.Wapp</FlaneurWorkingDirectory>
 		<FlaneurRestoreCommand>npm install</FlaneurRestoreCommand>
-		<FlaneurHttpUrlCommand>npm run -s print:start-url</FlaneurHttpUrlCommand>
-		<FlaneurHttpCommand>npm run start</FlaneurHttpCommand>
-		<FlaneurBundleAssetsCommand>npm run -s print:build-assets</FlaneurBundleAssetsCommand>
-		<FlaneurBundleCommand>npm run build</FlaneurBundleCommand>
+		<FlaneurHttpRunCommand>npm run start</FlaneurHttpRunCommand>
+		<FlaneurHttpPrintUrlCommand>npm run -s print:start-url</FlaneurHttpPrintUrlCommand>
+    <FlaneurBundleBuildCommand>npm run build</FlaneurBundleBuildCommand>
+		<FlaneurBundlePrintFilesCommand>npm run -s print:build-assets</FlaneurBundlePrintFilesCommand>
 
-		<FlaneurUseHttp>true</FlaneurUseHttp>
+		<!--<FlaneurMode>HTTP</FlaneurMode>-->
 
 		<CodesignKey>Apple Development: Nicholas Darvey (NP6ZUTWYTR)</CodesignKey>
 
