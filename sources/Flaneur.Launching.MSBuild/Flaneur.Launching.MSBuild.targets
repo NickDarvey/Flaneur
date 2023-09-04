@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="_FlaneurValidateProperties">
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.LaunchTask" AssemblyFile="$(FlaneurAssemblyPath)" />
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.SetEnvTask" AssemblyFile="$(FlaneurAssemblyPath)" />
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.DeepestCommonDirectoryTask" AssemblyFile="$(FlaneurAssemblyPath)" />
@@ -52,7 +52,18 @@
     </Otherwise>
   </Choose>
 
-	<!--
+  <!--
+    Apply properties from the FlaneurHttp and FlaneurBundle shorthand properties.
+    (Retain the original properties so we can emit a warning later in case both are set.)
+  -->
+  <PropertyGroup>
+    <_OriginalFlaneurBundleDirectory>$(FlaneurBundleDirectory)</_OriginalFlaneurBundleDirectory>
+    <FlaneurBundleDirectory Condition="$(FlaneurBundle) != ''">$(FlaneurBundle)</FlaneurBundleDirectory>
+    <_OriginalFlaneurHttpUrl>$(FlaneurHttpUrl)</_OriginalFlaneurHttpUrl>
+    <FlaneurHttpUrl Condition="$(FlaneurHttp) != ''">$(FlaneurHttp)</FlaneurHttpUrl>
+  </PropertyGroup>
+
+  <!--
 		Allow specifying bundle assets in project.
 
 		I tried making this easier to use by prepending the FlaneurWorkingDirectory and generating a link
@@ -64,10 +75,39 @@
 		> it into the Include attribute.
 		https://stackoverflow.com/a/5188096/1259408
 	-->
-	<ItemGroup Condition="$(TargetFramework.Contains('-ios')) == true">
-		<BundleResource Include="@(FlaneurBundleFile)" />
-	</ItemGroup>
- 
+  <ItemGroup Condition="$(TargetFramework.Contains('-ios')) == true">
+    <BundleResource Include="@(FlaneurBundleFile)" />
+  </ItemGroup>
+
+  
+  <Target Name="_FlaneurValidateProperties">
+    <Error
+      Condition="$(FlaneurBundle) != '' and $(FlaneurHttp) != ''"
+      Text="FlaneurBundle and FlaneurHttp properties are mutually exclusive but both were specified. (FlaneurBundle = $(FlaneurBundle); FlaneurHttp = $(FlaneurHttp))"/>
+    <Error
+      Condition="$(FlaneurMode) == 'HTTP' and $(FlaneurBundle) != ''"
+      Text="FlaneurMode=HTTP and FlaneurBundle are mutually exclusive but both were specified. (FlaneurMode = $(FlaneurMode); FlaneurBundle = $(FlaneurBundle)) "/>
+    <Error
+      Condition="$(FlaneurMode) == 'Bundle' and $(FlaneurHttp) != ''"
+      Text="FlaneurMode=Bundle and FlaneurHttp are mutually exclusive but both were specified. (FlaneurMode = $(FlaneurMode); FlaneurHttp = $(FlaneurHttp)) "/>
+
+    <Warning
+      Condition="$(FlaneurBundle) != '' and $(_OriginalFlaneurBundleDirectory) != ''"
+      Text="FlaneurBundle will override FlaneurBundleDirectory. (FlaneurBundle = $(FlaneurBundle); FlaneurBundleDirectory = $(_OriginalFlaneurBundleDirectory))"/>
+    <Warning
+      Condition="$(FlaneurHttp) != '' and $(_OriginalFlaneurHttpUrl) != ''"
+      Text="FlaneurHttp will override FlaneurHttpUrl. (FlaneurHttp = $(FlaneurHttp); FlaneurHttpUrl = $(_OriginalFlaneurHttpUrl))"/>
+  </Target>
+
+  <Target Name="_FlaneurRestore" Condition="'$(FlaneurRestoreCommand)' != ''" BeforeTargets="CollectPackageReferences">
+    <Message
+			Importance="high"
+			Text="Flaneur is running restore command '$(FlaneurRestoreCommand)'" />
+    <Exec
+			Command="$(FlaneurRestoreCommand)"
+			WorkingDirectory="$(FlaneurWorkingDirectory)" />
+  </Target>
+
   <Target Name="_FlaneurBuildBundle" Condition="$(FlaneurMode) == 'Bundle' and $(FlaneurBundleBuildCommand) != ''">
     <Message
       Importance="high"
@@ -78,8 +118,6 @@
   </Target>
   
   <Target Name="_FlaneurIncludeBundle" Condition="$(FlaneurMode) == 'Bundle'">
-		<!-- TODO: Allow bundle assets set from property FlaneurBundleFiles for CLI usage -->
-
 
 		<Exec
 			Condition="'$(FlaneurBundlePrintFilesCommand)' != ''"
