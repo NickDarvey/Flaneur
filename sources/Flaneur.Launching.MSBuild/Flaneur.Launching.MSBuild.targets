@@ -40,7 +40,7 @@
 	</PropertyGroup>
   
   <Choose>
-    <When Condition="$(FlaneurMode) == 'HTTP' or $(FlaneurHttp) != '' or $(FlaneurMode) == '' and $(_IsHttpLaunch) == true and $(FlaneurBundle) == ''">
+    <When Condition="$(FlaneurMode) == 'HTTP' or $(FlaneurHttp) != '' or ($(FlaneurMode) == '' and $(_IsHttpLaunch) == true and $(FlaneurBundle) == '')">
       <PropertyGroup>
         <FlaneurMode>HTTP</FlaneurMode>
       </PropertyGroup>
