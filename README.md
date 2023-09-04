@@ -125,14 +125,12 @@ You can control whether your wapp is launched via _HTTP_ or _bundle_ with the pr
 | FlaneurMode | The mode Flaneur Launching should use. | 'HTTP' or 'Bundle'. |
 | FlaneurWorkingDirectory | The working directory to which all commands and files are relative. | Directory path. |
 | FlaneurRestoreCommand | A command that restores packages for a wapp. | Command line expression. |
-| FlaneurBundle | Equivalent to setting the mode to _Bundle_ and specifying `FlaneurBundleDirectory`. | Directory path.|
 | FlaneurBundleBuildCommand | A command that produces a wapp to be bundled. | Command line expression. |
 | FlaneurBundlePrintFilesCommand | A command that prints a list of files to be bundled | Command line expression that prints file paths separated by new lines. |
 | FlaneurBundleDirectory | A path to a directory to bundle. All subpaths will be bundled. | Directory path. |
 | FlaneurBundleFiles | Paths to files to bundle. | File paths separated by semicolons. |
 | FlaneurBundlePrintUrlCommand | A command that prints the URL to launch on startup if in _Bundle_ mode. | Command line expression that prints a URL. |
 | FlaneurHttpUrl | The URL to launch on startup if in _Bundle_ mode. | URL. |
-| FlaneurHttp | Equivalent to setting the mode to _HTTP_ and specifying `FlaneurHttpUrl`. | URL. |
 | FlaneurHttpRunCommand | A command that serves a wapp over HTTP. | Command line expression |
 | FlaneurHttpPrintUrlCommand | A command that prints the URL to launch on startup if in _HTTP_ mode. | Command line expression that prints a URL. |
 | FlaneurHttpUrl | The URL to launch on startup if in _HTTP_ mode. | URL. |

@@ -53,17 +53,6 @@
   </Choose>
 
   <!--
-    Apply properties from the FlaneurHttp and FlaneurBundle shorthand properties.
-    (Retain the original properties so we can emit a warning later in case both are set.)
-  -->
-  <PropertyGroup>
-    <_OriginalFlaneurBundleDirectory>$(FlaneurBundleDirectory)</_OriginalFlaneurBundleDirectory>
-    <FlaneurBundleDirectory Condition="$(FlaneurBundle) != ''">$(FlaneurBundle)</FlaneurBundleDirectory>
-    <_OriginalFlaneurHttpUrl>$(FlaneurHttpUrl)</_OriginalFlaneurHttpUrl>
-    <FlaneurHttpUrl Condition="$(FlaneurHttp) != ''">$(FlaneurHttp)</FlaneurHttpUrl>
-  </PropertyGroup>
-
-  <!--
 		Allow specifying bundle assets in project.
 
 		I tried making this easier to use by prepending the FlaneurWorkingDirectory and generating a link
@@ -90,13 +79,6 @@
     <Error
       Condition="$(FlaneurMode) == 'Bundle' and $(FlaneurHttp) != ''"
       Text="FlaneurMode=Bundle and FlaneurHttp are mutually exclusive but both were specified. (FlaneurMode = $(FlaneurMode); FlaneurHttp = $(FlaneurHttp)) "/>
-
-    <Warning
-      Condition="$(FlaneurBundle) != '' and $(_OriginalFlaneurBundleDirectory) != ''"
-      Text="FlaneurBundle will override FlaneurBundleDirectory. (FlaneurBundle = $(FlaneurBundle); FlaneurBundleDirectory = $(_OriginalFlaneurBundleDirectory))"/>
-    <Warning
-      Condition="$(FlaneurHttp) != '' and $(_OriginalFlaneurHttpUrl) != ''"
-      Text="FlaneurHttp will override FlaneurHttpUrl. (FlaneurHttp = $(FlaneurHttp); FlaneurHttpUrl = $(_OriginalFlaneurHttpUrl))"/>
   </Target>
 
   <Target Name="_FlaneurRestore" Condition="'$(FlaneurRestoreCommand)' != ''" BeforeTargets="CollectPackageReferences">
