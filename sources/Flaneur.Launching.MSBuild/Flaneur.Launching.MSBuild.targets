@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="_FlaneurValidateProperties">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.LaunchTask" AssemblyFile="$(FlaneurAssemblyPath)" />
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.SetEnvTask" AssemblyFile="$(FlaneurAssemblyPath)" />
 	<UsingTask TaskName="Flaneur.Launching.MSBuild.DeepestCommonDirectoryTask" AssemblyFile="$(FlaneurAssemblyPath)" />
@@ -67,19 +67,6 @@
   <ItemGroup Condition="$(TargetFramework.Contains('-ios')) == true">
     <BundleResource Include="@(FlaneurBundleFile)" />
   </ItemGroup>
-
-  
-  <Target Name="_FlaneurValidateProperties">
-    <Error
-      Condition="$(FlaneurBundle) != '' and $(FlaneurHttp) != ''"
-      Text="FlaneurBundle and FlaneurHttp properties are mutually exclusive but both were specified. (FlaneurBundle = $(FlaneurBundle); FlaneurHttp = $(FlaneurHttp))"/>
-    <Error
-      Condition="$(FlaneurMode) == 'HTTP' and $(FlaneurBundle) != ''"
-      Text="FlaneurMode=HTTP and FlaneurBundle are mutually exclusive but both were specified. (FlaneurMode = $(FlaneurMode); FlaneurBundle = $(FlaneurBundle)) "/>
-    <Error
-      Condition="$(FlaneurMode) == 'Bundle' and $(FlaneurHttp) != ''"
-      Text="FlaneurMode=Bundle and FlaneurHttp are mutually exclusive but both were specified. (FlaneurMode = $(FlaneurMode); FlaneurHttp = $(FlaneurHttp)) "/>
-  </Target>
 
   <Target Name="_FlaneurRestore" Condition="'$(FlaneurRestoreCommand)' != ''" BeforeTargets="CollectPackageReferences">
     <Message
