@@ -100,9 +100,19 @@
 		<ItemGroup>
 			<!-- Expand multi-value property into items -->
 			<_FlaneurBundleExpandedFile Include="$(FlaneurBundleFiles)" />
-			<!-- Resolve paths based on working directory -->
-			<_FlaneurBundleResolvedFile Include="@(_FlaneurBundleExpandedFile -> '$(FlaneurWorkingDirectory)/%(Identity)')" />
-			<_FlaneurBundleResolvedFile Condition="'$(FlaneurBundleDirectory)' != ''" Include="$(FlaneurWorkingDirectory)/$(FlaneurBundleDirectory)/**/*" />
+			 <!--Resolve paths based on working directory if necessary --> 
+			<_FlaneurBundleResolvedFile
+        Condition="$([System.IO.Path]::IsPathFullyQualified(%(RelativeDir))) == 'true'"
+        Include="@(_FlaneurBundleExpandedFile -> '%(Identity)')" />
+      <_FlaneurBundleResolvedFile
+        Condition="$([System.IO.Path]::IsPathFullyQualified(%(RelativeDir))) == 'false'"
+        Include="@(_FlaneurBundleExpandedFile -> '$(FlaneurWorkingDirectory)/%(Identity)')" />
+      <_FlaneurBundleResolvedFile
+        Condition="'$(FlaneurBundleDirectory)' != '' and $([System.IO.Path]::IsPathFullyQualified($(FlaneurBundleDirectory))) == 'true'"
+        Include="$(FlaneurBundleDirectory)/**/*" />
+      <_FlaneurBundleResolvedFile
+        Condition="'$(FlaneurBundleDirectory)' != '' and $([System.IO.Path]::IsPathFullyQualified($(FlaneurBundleDirectory))) == 'false'"
+        Include="$(FlaneurWorkingDirectory)/$(FlaneurBundleDirectory)/**/*" />
 		</ItemGroup>
 
 		<DeepestCommonDirectoryTask Items="@(_FlaneurBundleResolvedFile)">
@@ -116,7 +126,7 @@
 			</FlaneurBundleFile>
 		</ItemGroup>
 
-		<Message Importance="high" Text="Flaneur is bundling @(FlaneurBundleFile->Count()) files" />
+    <Message Importance="high" Text="Flaneur is bundling @(FlaneurBundleFile->Count()) files" />
 
 		<ItemGroup Condition="$(TargetFramework.Contains('-ios')) == true">
 			<BundleResource Include="@(FlaneurBundleFile)" KeepDuplicates="false" />
