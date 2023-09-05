@@ -84,19 +84,19 @@ dotnet build -t:Run -f net7.0-ios -p:_DeviceName=:v2:udid=MY_SPECIFIC_UDID` -p:F
 
 You can also specify the behaviours for how Flaneur launches with _HTTP_ and _bundle_ so your wapp is built or started when you build or run the host in Visual Studio or via the dotnet CLI.
 
-You can control whether your wapp is launched via _HTTP_ or _bundle_ with the property `FlaneurUseHttp`.
+You can control whether your wapp is launched via _HTTP_ or _bundle_ with the property `FlaneurMode`. If you don't specify a mode, it'll use _HTTP_ if you're running a Visual Studio 'Start Debugging (F5)' build, or otherwise use _bundle_.
 
 **fsproj and package.json**
 
 ```xml
 <PropertyGroup>
     <FlaneurWorkingDirectory>../Flaneur.Examples.iOS.App</FlaneurWorkingDirectory>
-    <FlaneurHttpUrlCommand>npm run -s print:start-url</FlaneurHttpUrlCommand>
-    <FlaneurHttpCommand>npm run start</FlaneurHttpCommand>
-    <FlaneurBundleAssetsCommand>npm run -s print:build-assets</FlaneurBundleAssetsCommand>
-    <FlaneurBundleCommand>npm run build</FlaneurBundleCommand>
+    <FlaneurHttpRunCommand>npm run start</FlaneurHttpRunCommand>
+    <FlaneurHttpPrintUrlCommand>npm run -s print:start-url</FlaneurHttpPrintUrlCommand>
+    <FlaneurBundleBuildCommand>npm run build</FlaneurBundleBuildCommand>
+    <FlaneurBundlePrintFilesCommand>npm run -s print:build-assets</FlaneurBundlePrintFilesCommand>
 
-    <FlaneurUseHttp>false</FlaneurUseHttp>
+    <FlaneurMode>Bundle</FlaneurMode>
 </PropertyGroup>
 ```
 
@@ -118,6 +118,22 @@ You can control whether your wapp is launched via _HTTP_ or _bundle_ with the pr
 }
 ```
 
+**MSBuild Properties**
+
+| Property Name | Description | Allowed Values |
+| - | - | - |
+| FlaneurMode | The mode Flaneur Launching should use. | 'HTTP' or 'Bundle'. |
+| FlaneurWorkingDirectory | The working directory to which all commands and files are relative. | Directory path. |
+| FlaneurRestoreCommand | A command that restores packages for a wapp. | Command line expression. |
+| FlaneurBundleBuildCommand | A command that produces a wapp to be bundled. | Command line expression. |
+| FlaneurBundlePrintFilesCommand | A command that prints a list of files to be bundled | Command line expression that prints file paths separated by new lines. |
+| FlaneurBundleDirectory | A path to a directory to bundle. All subpaths will be bundled. | Directory path. |
+| FlaneurBundleFiles | Paths to files to bundle. | File paths separated by semicolons. |
+| FlaneurBundlePrintUrlCommand | A command that prints the URL to launch on startup if in _Bundle_ mode. | Command line expression that prints a URL. |
+| FlaneurHttpUrl | The URL to launch on startup if in _Bundle_ mode. | URL. |
+| FlaneurHttpRunCommand | A command that serves a wapp over HTTP. | Command line expression |
+| FlaneurHttpPrintUrlCommand | A command that prints the URL to launch on startup if in _HTTP_ mode. | Command line expression that prints a URL. |
+| FlaneurHttpUrl | The URL to launch on startup if in _HTTP_ mode. | URL. |
 
 
 ## Remoting
