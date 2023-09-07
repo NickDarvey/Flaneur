@@ -100,21 +100,22 @@
 		<ItemGroup>
 			<!-- Expand multi-value property into items -->
 			<_FlaneurBundleExpandedFile Include="$(FlaneurBundleFiles)" />
-			 <!--Resolve paths based on working directory if necessary --> 
-			<_FlaneurBundleResolvedFile
-        Condition="$(FlaneurBundleFiles) != '' and $([System.IO.Path]::IsPathFullyQualified(%(RelativeDir))) == 'true'"
+      <!--Resolve paths based on working directory if necessary -->
+      <_FlaneurBundleResolvedFile
+        Condition="$(FlaneurBundleFiles) != '' and $([System.IO.Path]::IsPathRooted(%(RelativeDir))) == 'true'"
         Include="@(_FlaneurBundleExpandedFile -> '%(Identity)')" />
       <_FlaneurBundleResolvedFile
-        Condition="$(FlaneurBundleFiles) != '' and $([System.IO.Path]::IsPathFullyQualified(%(RelativeDir))) == 'false'"
+        Condition="$(FlaneurBundleFiles) != '' and $([System.IO.Path]::IsPathRooted(%(RelativeDir))) == 'false'"
         Include="@(_FlaneurBundleExpandedFile -> '$(FlaneurWorkingDirectory)/%(Identity)')" />
       <_FlaneurBundleResolvedFile
-        Condition="'$(FlaneurBundleDirectory)' != '' and $([System.IO.Path]::IsPathFullyQualified($(FlaneurBundleDirectory))) == 'true'"
+        Condition="'$(FlaneurBundleDirectory)' != '' and $([System.IO.Path]::IsPathRooted($(FlaneurBundleDirectory))) == 'true'"
         Include="$(FlaneurBundleDirectory)/**/*" />
       <_FlaneurBundleResolvedFile
-        Condition="'$(FlaneurBundleDirectory)' != '' and $([System.IO.Path]::IsPathFullyQualified($(FlaneurBundleDirectory))) == 'false'"
+        Condition="'$(FlaneurBundleDirectory)' != '' and $([System.IO.Path]::IsPathRooted($(FlaneurBundleDirectory))) == 'false'"
         Include="$(FlaneurWorkingDirectory)/$(FlaneurBundleDirectory)/**/*" />
-		</ItemGroup>
+    </ItemGroup>
 
+    
 		<DeepestCommonDirectoryTask Items="@(_FlaneurBundleResolvedFile)">
 			<Output TaskParameter="Directory" PropertyName="_FlaneurBundleCommonDirectory" />
 		</DeepestCommonDirectoryTask>
